@@ -92,6 +92,20 @@ select:focus, input:focus { border-color: #ab84ff; }
 .paste-status.error { color: #ff4444; }
 .btn-parse { margin-top: 8px; }
 
+/* Player edit */
+.player-nick-display { position: relative; }
+.edit-player-btn { background: none; border: none; cursor: pointer; color: #444450; font-size: 11px; padding: 0 0 0 4px; line-height: 1; transition: color 0.15s; flex-shrink: 0; }
+.edit-player-btn:hover { color: #ab84ff; }
+.player-edit-popup { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 200; background: #1e1c20; border: 1px solid #35323a; border-radius: 8px; padding: 10px; width: 260px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.player-edit-popup.open { display: block; }
+.player-edit-popup label { font-size: 11px; color: #666672; margin-bottom: 3px; margin-top: 6px; display: block; }
+.player-edit-popup label:first-child { margin-top: 0; }
+.player-edit-popup input { width: 100%; background: #2a272e; border: 1px solid #35323a; border-radius: 5px; color: #fff; font-size: 12px; padding: 6px 8px; outline: none; }
+.player-edit-popup input:focus { border-color: #ab84ff; }
+.popup-btns { display: flex; gap: 6px; margin-top: 8px; }
+.popup-btn-save { flex: 1; padding: 6px; background: #ab84ff; color: #141218; border: none; border-radius: 5px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.popup-btn-cancel { padding: 6px 10px; background: #2a272e; color: #888890; border: 1px solid #35323a; border-radius: 5px; font-size: 12px; cursor: pointer; }
+
 /* Searchable dropdown */
 .sd-wrap { position: relative; }
 .sd-input { width: 100%; background: #2a272e; border: 1px solid #35323a; border-radius: 6px; color: #fff; font-size: 13px; padding: 8px 10px; outline: none; transition: border-color 0.15s; cursor: text; }
@@ -1170,9 +1184,22 @@ function renderPlayerRows(teamKey, containerId, labelId) {
   let html = `<div class="player-row-label"><span>Игрок</span><span>K-D</span><span>Swing</span><span>ADR</span><span>Rating</span></div>`;
   team.players.forEach((p, i) => {
     html += `<div class="player-row">
-      <div class="player-nick-display">
-        <img src="${FLAG}${p.flag}.svg" alt="${p.flag}">
-        " ${p.nick} "
+      <div class="player-nick-display" style="position:relative">
+        <img src="${FLAG}${p.flag}.svg" alt="${p.flag}" data-flag-img="${i}-${containerId}">
+        <span data-nick-text="${i}-${containerId}">" ${p.nick} "</span>
+        <button class="edit-player-btn" data-edit="${i}-${containerId}" title="Сменить игрока">✎</button>
+        <div class="player-edit-popup" id="popup-${i}-${containerId}">
+          <label>Страна (код флага, напр. ru)</label>
+          <input type="text" id="edit-flag-${i}-${containerId}" placeholder="ru" value="${p.flag}">
+          <label>Ник</label>
+          <input type="text" id="edit-nick-${i}-${containerId}" placeholder="donk" value="${p.nick}">
+          <label>Ссылка на игрока</label>
+          <input type="text" id="edit-url-${i}-${containerId}" placeholder="https://esports.ru/..." value="${p.url || ''}">
+          <div class="popup-btns">
+            <button class="popup-btn-save" data-save="${i}-${containerId}">Сохранить</button>
+            <button class="popup-btn-cancel" data-cancel="${i}-${containerId}">Отмена</button>
+          </div>
+        </div>
       </div>
       <input type="text" placeholder="33-31" data-player="${i}" data-field="kd">
       <div class="swing-wrap">
@@ -1188,6 +1215,46 @@ function renderPlayerRows(teamKey, containerId, labelId) {
   container.querySelectorAll('.swing-val').forEach(inp => {
     inp.addEventListener('input', () => updateSwingSign(inp, containerId));
   });
+
+  // Edit popup logic
+  container.querySelectorAll('.edit-player-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = btn.dataset.edit;
+      // Close all other popups
+      document.querySelectorAll('.player-edit-popup').forEach(p => p.classList.remove('open'));
+      document.getElementById(`popup-${key}`).classList.add('open');
+    });
+  });
+
+  container.querySelectorAll('.player-edit-popup').forEach(popup => {
+    popup.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  container.querySelectorAll('.popup-btn-save').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.save;
+      const flag = document.getElementById(`edit-flag-${key}`).value.trim().toLowerCase();
+      const nick = document.getElementById(`edit-nick-${key}`).value.trim();
+      const url  = document.getElementById(`edit-url-${key}`).value.trim();
+      // Update display
+      const flagImg  = container.querySelector(`[data-flag-img="${key}"]`);
+      const nickSpan = container.querySelector(`[data-nick-text="${key}"]`);
+      if (flagImg) flagImg.src = `${FLAG}${flag}.svg`;
+      if (nickSpan) nickSpan.textContent = `" ${nick} "`;
+      // Store override on the team data so getStats picks it up
+      const idx = parseInt(key.split('-')[0]);
+      DB.teams[teamKey].players[idx]._override = { flag, nick, url };
+      document.getElementById(`popup-${key}`).classList.remove('open');
+    });
+  });
+
+  container.querySelectorAll('.popup-btn-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.cancel;
+      document.getElementById(`popup-${key}`).classList.remove('open');
+    });
+  });
 }
 
 function updateSwingSign(inp, containerId) {
@@ -1202,6 +1269,11 @@ function updateSwingSign(inp, containerId) {
 document.getElementById('team1-select').addEventListener('change', e => renderPlayerRows(e.target.value, 'team1-players', 'team1-label'));
 document.getElementById('team2-select').addEventListener('change', e => renderPlayerRows(e.target.value, 'team2-players', 'team2-label'));
 
+// Close edit popups on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.player-edit-popup.open').forEach(p => p.classList.remove('open'));
+});
+
 // GET STATS & SORT BY RATING
 function getStats(containerId, teamKey) {
   const container = document.getElementById(containerId);
@@ -1210,6 +1282,12 @@ function getStats(containerId, teamKey) {
     const swRaw = container.querySelector(`[data-player="${i}"][data-field="swing"]`)?.value.trim() || '';
     const adr   = container.querySelector(`[data-player="${i}"][data-field="adr"]`)?.value.trim() || '—';
     const rating= container.querySelector(`[data-player="${i}"][data-field="rating"]`)?.value.trim() || '—';
+
+    // Apply manual override if set
+    const ov = p._override;
+    const flag = ov ? ov.flag : p.flag;
+    const nick = ov ? ov.nick : p.nick;
+    const url  = ov ? ov.url  : p.url;
     
     let swing = swRaw, swingClass = '';
     if (swRaw) {
@@ -1224,7 +1302,7 @@ function getStats(containerId, teamKey) {
         }
       }
     }
-    return { ...p, kd, swing, swingClass, adr, rating };
+    return { ...p, flag, nick, url, kd, swing, swingClass, adr, rating };
   });
 
   return list.sort((a, b) => {
