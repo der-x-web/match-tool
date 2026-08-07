@@ -106,7 +106,18 @@ select:focus, input:focus { border-color: #ab84ff; }
 .popup-btn-save { flex: 1; padding: 6px; background: #ab84ff; color: #141218; border: none; border-radius: 5px; font-size: 12px; font-weight: 700; cursor: pointer; }
 .popup-btn-cancel { padding: 6px 10px; background: #2a272e; color: #888890; border: 1px solid #35323a; border-radius: 5px; font-size: 12px; cursor: pointer; }
 
-/* Searchable dropdown */
+/* Game switcher */
+.game-switcher { display: flex; gap: 0; margin-bottom: 24px; background: #1e1c20; border: 1px solid #2a272e; border-radius: 8px; padding: 4px; width: fit-content; }
+.game-btn { display: flex; align-items: center; gap: 7px; padding: 7px 20px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: none; color: #666672; transition: all 0.18s; letter-spacing: 0.3px; }
+.game-btn .game-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.4; transition: all 0.18s; }
+.game-btn.active { background: #2a272e; color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+.game-btn.active .game-dot { opacity: 1; }
+.game-btn[data-game="cs2"].active .game-dot { background: #f0a500; }
+.game-btn[data-game="val"].active .game-dot { background: #ff4655; }
+.game-btn[data-game="val"].active { color: #fff; }
+.game-btn:hover:not(.active) { color: #c5c5c6; }
+.game-section { display: none; }
+.game-section.active { display: block; }
 .sd-wrap { position: relative; }
 .sd-input { width: 100%; background: #2a272e; border: 1px solid #35323a; border-radius: 6px; color: #fff; font-size: 13px; padding: 8px 10px; outline: none; transition: border-color 0.15s; cursor: text; }
 .sd-input::placeholder { color: #555560; }
@@ -129,6 +140,14 @@ select:focus, input:focus { border-color: #ab84ff; }
 <body>
 <div class="app">
   <h1>Match Tool — esports.ru</h1>
+
+  <div class="game-switcher">
+    <button class="game-btn active" data-game="cs2"><span class="game-dot"></span>CS2</button>
+    <button class="game-btn" data-game="val"><span class="game-dot"></span>VALORANT</button>
+  </div>
+
+  <!-- CS2 -->
+  <div class="game-section active" id="game-cs2">
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="scoreboard">Скорборд</button>
@@ -514,13 +533,77 @@ select:focus, input:focus { border-color: #ab84ff; }
       <div class="output-code" id="maps-code"></div>
     </div>
   </div>
+
+  </div><!-- /game-cs2 -->
+
+  <!-- VALORANT -->
+  <div class="game-section" id="game-val">
+
+    <div class="card">
+      <div class="card-title">1. Выбери команды</div>
+      <div class="row-2">
+        <div><label>Команда 1</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="val-team1-display" placeholder="— выбрать —">
+            <select id="val-team1-select" style="display:none">
+              <option value="">— выбрать —</option>
+              <option value="prx">Paper Rex</option>
+              <option value="g2val">G2 Esports</option>
+            </select>
+            <div class="sd-dropdown" id="val-team1-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+        <div><label>Команда 2</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="val-team2-display" placeholder="— выбрать —">
+            <select id="val-team2-select" style="display:none">
+              <option value="">— выбрать —</option>
+              <option value="prx">Paper Rex</option>
+              <option value="g2val">G2 Esports</option>
+            </select>
+            <div class="sd-dropdown" id="val-team2-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. Вставь статистику с VLR</div>
+      <div class="notice">⚡ Сначала выбери команды, потом вставляй статистику</div>
+      <textarea class="paste-area" id="val-paste" placeholder="Скопируй таблицу статистики с vlr.gg и вставь сюда"></textarea>
+      <div class="paste-status" id="val-paste-status"></div>
+      <button class="btn btn-primary btn-parse" id="val-btn-parse">Заполнить из текста</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3. Проверь и скорректируй данные</div>
+      <div class="teams-grid">
+        <div><div class="card-title" id="val-team1-label" style="margin-bottom:8px">Команда 1</div><div id="val-team1-players"></div></div>
+        <div><div class="card-title" id="val-team2-label" style="margin-bottom:8px">Команда 2</div><div id="val-team2-players"></div></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="val-gen-scoreboard">Сгенерировать HTML</button>
+      <button class="btn btn-copy" id="val-copy-scoreboard" style="display:none">Скопировать</button>
+    </div>
+
+    <div class="output-wrap" id="val-scoreboard-output">
+      <div class="card-title" style="margin-bottom:8px">Превью</div>
+      <div class="output-preview" id="val-scoreboard-preview"></div>
+      <div class="card-title" style="margin-bottom:8px;margin-top:16px">HTML</div>
+      <div class="output-code" id="val-scoreboard-code"></div>
+    </div>
+
+  </div><!-- /game-val -->
+
 </div>
 
 <script>
 const DB = {
   teams: {
     vitality: {
-      name: 'Team Vitality', shortName: 'Vitality', ru: 'виталити', logo: 'https://esports.ru/wp-content/uploads/2024/12/team-vitality.png', url: 'https://esports.ru/teams/vitality-cs2/',
+      name: 'Team Vitality', shortName: 'Vitality', ru: 'виталити', logo: 'https://esports.ru/wp-content/uploads/2024/12/team-vitality.png', url: 'https://esports.ru/counter-strike-2/teams/vitality-cs2/',
       players: [
         { nick: 'apEX',   first: 'Дан',    last: 'Мадесклер', flag: 'fr', url: 'https://esports.ru/counter-strike-2/players/apex-4fa564ba-a70d-4463-ba36-7787a87af6f3-cs2/' },
         { nick: 'ZywOo',  first: 'Матье',  last: 'Эрбо',      flag: 'fr', url: 'https://esports.ru/counter-strike-2/players/zywoo-cs2/' },
@@ -530,7 +613,7 @@ const DB = {
       ]
     },
     furia: {
-      name: 'FURIA', shortName: 'FURIA', ru: 'фурия', logo: 'https://esports.ru/wp-content/uploads/2024/12/furia-esports-150x150.png', url: 'https://esports.ru/teams/furia-cs2/',
+      name: 'FURIA', shortName: 'FURIA', ru: 'фурия', logo: 'https://esports.ru/wp-content/uploads/2024/12/furia-esports-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/furia-cs2/',
       players: [
         { nick: 'FalleN',   first: 'Габриель', last: 'Толедо',    flag: 'br', url: 'https://esports.ru/counter-strike-2/players/fallen-cs2/' },
         { nick: 'molodoy',  first: 'Данил',    last: 'Голубенко', flag: 'kz', url: 'https://esports.ru/counter-strike-2/players/molodoy-cs2/' },
@@ -540,7 +623,7 @@ const DB = {
       ]
     },
     spirit: {
-      name: 'Team Spirit', shortName: 'Spirit', ru: 'спирит', logo: 'https://esports.ru/wp-content/uploads/2025/03/photo_2025-03-17_15-55-44-photoroom-150x150.png', url: 'https://esports.ru/teams/spirit-cs2/',
+      name: 'Team Spirit', shortName: 'Spirit', ru: 'спирит', logo: 'https://esports.ru/wp-content/uploads/2025/03/photo_2025-03-17_15-55-44-photoroom-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/spirit-cs2/',
       players: [
         { nick: 'magixx', first: 'Борис',   last: 'Воробьев',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/magixx-cs2/' },
         { nick: 'donk',   first: 'Данил',   last: 'Крышковец',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/donk-cs2/' },
@@ -550,7 +633,7 @@ const DB = {
       ]
     },
     thieves100: {
-      name: '100 Thieves', shortName: '100T', ru: 'сотка тивс воры', logo: 'https://esports.ru/wp-content/uploads/2024/12/100-thieves.png', url: 'https://esports.ru/teams/100-thieves-cs-go-cs2/',
+      name: '100 Thieves', shortName: '100T', ru: 'сотка тивс воры', logo: 'https://esports.ru/wp-content/uploads/2024/12/100-thieves.png', url: 'https://esports.ru/counter-strike-2/teams/100-thieves-cs-go-cs2/',
       players: [
         { nick: 'rain',   first: 'Ховард',  last: 'Найгард',         flag: 'no', url: 'https://esports.ru/counter-strike-2/players/rain-04abb3a0-b4a9-4c29-a332-7a6e3e5df576-cs2/' },
         { nick: 'poiii',  first: 'Алекс',   last: 'Нихольм Сундгрен', flag: 'se', url: 'https://esports.ru/counter-strike-2/players/poiii-cs2/' },
@@ -560,7 +643,7 @@ const DB = {
       ]
     },
     falcons: {
-      name: 'Team Falcons', shortName: 'Falcons', ru: 'фалконс соколы', logo: 'https://esports.ru/wp-content/uploads/2025/11/image_2025-11-19_183040613.png', url: 'https://esports.ru/teams/falcons-cs2/',
+      name: 'Team Falcons', shortName: 'Falcons', ru: 'фалконс соколы', logo: 'https://esports.ru/wp-content/uploads/2025/11/image_2025-11-19_183040613.png', url: 'https://esports.ru/counter-strike-2/teams/falcons-cs2/',
       players: [
         { nick: 'karrigan', first: 'Финн',    last: 'Андерсен',  flag: 'dk', url: 'https://esports.ru/counter-strike-2/players/karrigan-cs2/' },
         { nick: 'NiKo',     first: 'Никола',  last: 'Ковач',     flag: 'ba', url: 'https://esports.ru/counter-strike-2/players/niko-cs2/' },
@@ -570,7 +653,7 @@ const DB = {
       ]
     },
     faze: {
-      name: 'FaZe Clan', shortName: 'FaZe', ru: 'фейз клан', logo: 'https://esports.ru/wp-content/uploads/2025/05/image_2025-05-06_115226120-150x150.png', url: 'https://esports.ru/teams/faze-cs2/',
+      name: 'FaZe Clan', shortName: 'FaZe', ru: 'фейз клан', logo: 'https://esports.ru/wp-content/uploads/2025/05/image_2025-05-06_115226120-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/faze-cs2/',
       players: [
         { nick: 'neityu',  first: 'Райан',      last: 'Обри',            flag: 'fr', url: 'https://esports.ru/counter-strike-2/players/neityu-cs2/' },
         { nick: 'frozen',  first: 'Давид',      last: 'Чернянский',      flag: 'sk', url: 'https://esports.ru/counter-strike-2/players/frozen-david-cernansky-cs2/' },
@@ -580,7 +663,7 @@ const DB = {
       ]
     },
     navi: {
-      name: 'Natus Vincere', shortName: 'NAVI', ru: 'натус винчере нави', logo: 'https://esports.ru/wp-content/uploads/2024/11/navi-150x150.png', url: 'https://esports.ru/teams/navi-cs2/',
+      name: 'Natus Vincere', shortName: 'NAVI', ru: 'натус винчере нави', logo: 'https://esports.ru/wp-content/uploads/2024/11/navi-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/navi-cs2/',
       players: [
         { nick: 'Aleksib',   first: 'Алекси',  last: 'Виролайнен', flag: 'fi', url: 'https://esports.ru/counter-strike-2/players/aleksib-cs2/' },
         { nick: 'b1t',       first: 'Валерий', last: 'Ваховский',  flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/b1t-cs2/' },
@@ -590,7 +673,7 @@ const DB = {
       ]
     },
     aurora: {
-      name: 'Aurora Gaming', shortName: 'Aurora', ru: 'аурора', logo: 'https://esports.ru/wp-content/uploads/2025/03/photo_2025-03-20_13-28-48-photoroom.png', url: 'https://esports.ru/teams/aurora-rus-cs2/',
+      name: 'Aurora Gaming', shortName: 'Aurora', ru: 'аурора', logo: 'https://esports.ru/wp-content/uploads/2025/03/photo_2025-03-20_13-28-48-photoroom.png', url: 'https://esports.ru/counter-strike-2/teams/aurora-rus-cs2/',
       players: [
         { nick: 'kyxsan',   first: 'Дамьян',      last: 'Стоилковски',   flag: 'mk', url: 'https://esports.ru/counter-strike-2/players/kyxsan-cs2/' },
         { nick: 'Jimpphat', first: 'Джими',       last: 'Сало',          flag: 'fi', url: 'https://esports.ru/counter-strike-2/players/jimpphat-cs2/' },
@@ -600,7 +683,7 @@ const DB = {
       ]
     },
     dmax: {
-      name: '3DMAX', shortName: '3DMAX', ru: 'три дэ макс', logo: 'https://esports.ru/wp-content/uploads/2024/11/c579-1-150x150.png', url: 'https://esports.ru/teams/3dmax-cs2/',
+      name: '3DMAX', shortName: '3DMAX', ru: 'три дэ макс', logo: 'https://esports.ru/wp-content/uploads/2024/11/c579-1-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/3dmax-cs2/',
       players: [
         { nick: 'Graviti',  first: 'Филип',   last: 'Бранкович', flag: 'fr', url: 'https://esports.ru/counter-strike-2/players/graviti-cs2/' },
         { nick: 'Lucky',    first: 'Лукас',   last: 'Частанг',   flag: 'fr', url: 'https://esports.ru/counter-strike-2/players/lucky-dcd94963-7caf-4d7a-90d9-ed40b0b334ee-cs2/' },
@@ -610,7 +693,7 @@ const DB = {
       ]
     },
     pain: {
-      name: 'paiN Gaming', shortName: 'paiN', ru: 'пэйн гейминг', logo: 'https://esports.ru/wp-content/uploads/2024/12/pain-gaming-150x150.png', url: 'https://esports.ru/teams/pain-gaming-cs2/',
+      name: 'paiN Gaming', shortName: 'paiN', ru: 'пэйн гейминг', logo: 'https://esports.ru/wp-content/uploads/2024/12/pain-gaming-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/pain-gaming-cs2/',
       players: [
         { nick: 'biguzera', first: 'Родриго',   last: 'Биттенкур', flag: 'br', url: 'https://esports.ru/counter-strike-2/players/biguzera-cs2/' },
         { nick: 'saffee',   first: 'Рафаель',   last: 'Коста',     flag: 'br', url: 'https://esports.ru/counter-strike-2/players/saffe-cs2/' },
@@ -620,7 +703,7 @@ const DB = {
       ]
     },
     astralis: {
-      name: 'Astralis', shortName: 'Astralis', ru: 'астралис', logo: 'https://esports.ru/wp-content/uploads/2024/11/astralis-150x150.png', url: 'https://esports.ru/teams/astralis-cs2/',
+      name: 'Astralis', shortName: 'Astralis', ru: 'астралис', logo: 'https://esports.ru/wp-content/uploads/2024/11/astralis-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/astralis-cs2/',
       players: [
         { nick: 'HooXi',  first: 'Расмус', last: 'Нилсен',        flag: 'dk', url: 'https://esports.ru/counter-strike-2/players/hooxi-cs2/' },
         { nick: 'phzy',   first: 'Лав',    last: 'Смидебрант',     flag: 'se', url: 'https://esports.ru/counter-strike-2/players/phzy-love-smidebrant-cs2/' },
@@ -630,7 +713,7 @@ const DB = {
       ]
     },
     liquid: {
-      name: 'Team Liquid', shortName: 'Liquid', ru: 'ликвид', logo: 'https://esports.ru/wp-content/uploads/2024/11/liquid-1-150x150.png', url: 'https://esports.ru/teams/liquid-cs2/',
+      name: 'Team Liquid', shortName: 'Liquid', ru: 'ликвид', logo: 'https://esports.ru/wp-content/uploads/2024/11/liquid-1-150x150.png', url: 'https://esports.ru/counter-strike-2/teams/liquid-cs2/',
       players: [
         { nick: 'JT',      first: 'Джони',    last: 'Теодосиу',    flag: 'za', url: 'https://esports.ru/counter-strike-2/players/jt-cs2/' },
         { nick: 'Jorko',   first: 'Георгий',  last: 'Митев',        flag: 'bg', url: 'https://esports.ru/counter-strike-2/players/jorko-cs2/' },
@@ -640,7 +723,7 @@ const DB = {
       ]
     },
     passionua: {
-      name: 'Passion UA', shortName: 'PassionUA', ru: 'пэшн юэй юкрейн', logo: 'https://esports.ru/wp-content/uploads/2025/07/bez-imeni-1.png', url: 'https://esports.ru/teams/passion-ua-cs2/',
+      name: 'Passion UA', shortName: 'PassionUA', ru: 'пэшн юэй юкрейн', logo: 'https://esports.ru/wp-content/uploads/2025/07/bez-imeni-1.png', url: 'https://esports.ru/counter-strike-2/teams/passion-ua-cs2/',
       players: [
         { nick: 'JT',    first: 'Джонни',   last: 'Теодосиу',  flag: 'za', url: 'https://esports.ru/counter-strike-2/players/jt-cs2/' },
         { nick: 'Senzu', first: 'Азбаяр',   last: 'Мунхболд',  flag: 'mn', url: 'https://esports.ru/counter-strike-2/players/senzu-cs2/' },
@@ -650,7 +733,7 @@ const DB = {
       ]
     },
     heroic: {
-      name: 'HEROIC', shortName: 'HEROIC', ru: 'героик', logo: 'https://esports.ru/wp-content/uploads/2025/07/heroic2-128x128.png', url: 'https://esports.ru/teams/heroic-cs2/',
+      name: 'HEROIC', shortName: 'HEROIC', ru: 'героик', logo: 'https://esports.ru/wp-content/uploads/2025/07/heroic2-128x128.png', url: 'https://esports.ru/counter-strike-2/teams/heroic-cs2/',
       players: [
         { nick: 'Chr1zN',     first: 'Кристоффер', last: 'Сторгаард', flag: 'dk', url: 'https://esports.ru/counter-strike-2/players/chr1zn-cs2/' },
         { nick: 'nilo',       first: 'Линус',      last: 'Бергман',   flag: 'se', url: 'https://esports.ru/counter-strike-2/players/nilo-cs2/' },
@@ -660,7 +743,7 @@ const DB = {
       ]
     },
     parivision: {
-      name: 'PARIVISION', shortName: 'PARI', ru: 'паривижн', logo: 'https://esports.ru/wp-content/uploads/2025/11/parivision1-1.png', url: 'https://esports.ru/teams/parivision-cs2/',
+      name: 'PARIVISION', shortName: 'PARI', ru: 'паривижн', logo: 'https://esports.ru/wp-content/uploads/2025/11/parivision1-1.png', url: 'https://esports.ru/counter-strike-2/teams/parivision-cs2/',
       players: [
         { nick: 'Jame',        first: 'Джами',     last: 'Али',           flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/jame-cs2/' },
         { nick: 'zweih',       first: 'Иван',      last: 'Гогин',         flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/zweih-cs2/' },
@@ -670,7 +753,7 @@ const DB = {
       ]
     },
     gamerlegion: {
-      name: 'GamerLegion', shortName: 'GL', ru: 'геймер легион', logo: 'https://esports.ru/wp-content/uploads/2024/11/gamerlegion.png', url: 'https://esports.ru/teams/gamerlegion-cs2/',
+      name: 'GamerLegion', shortName: 'GL', ru: 'геймер легион', logo: 'https://esports.ru/wp-content/uploads/2024/11/gamerlegion.png', url: 'https://esports.ru/counter-strike-2/teams/gamerlegion-cs2/',
       players: [
         { nick: 'hypex',   first: 'Милан',    last: 'Половец',       flag: 'pl', url: 'https://esports.ru/counter-strike-2/players/hypex-cs2/' },
         { nick: 'Snax',    first: 'Януш',     last: 'Погожельски',   flag: 'pl', url: 'https://esports.ru/counter-strike-2/players/snax-cs2/' },
@@ -680,7 +763,7 @@ const DB = {
       ]
     },
     nip: {
-      name: 'Ninjas in Pyjamas', shortName: 'NIP', ru: 'ниндзя в пижамах нип', logo: 'https://esports.ru/wp-content/uploads/2024/11/ninjas-in-pyjamas-128x128.png', url: 'https://esports.ru/teams/ninjas-in-pyjamas-cs2/',
+      name: 'Ninjas in Pyjamas', shortName: 'NIP', ru: 'ниндзя в пижамах нип', logo: 'https://esports.ru/wp-content/uploads/2024/11/ninjas-in-pyjamas-128x128.png', url: 'https://esports.ru/counter-strike-2/teams/ninjas-in-pyjamas-cs2/',
       players: [
         { nick: 'Snappi',     first: 'Марко',   last: 'Пфайффер', flag: 'dk', url: 'https://esports.ru/counter-strike-2/players/snappi-cs2/' },
         { nick: 'sjuush',     first: 'Расмус',  last: 'Бек',      flag: 'dk', url: 'https://esports.ru/counter-strike-2/players/sjuush-cs2/' },
@@ -690,7 +773,7 @@ const DB = {
       ]
     },
     fut: {
-      name: 'FUT', shortName: 'FUT', ru: 'фут эспортс', logo: 'https://esports.ru/wp-content/uploads/2026/01/image_2026-01-11_120634098.png', url: 'https://esports.ru/teams/fut-esports-cs-go-cs2/',
+      name: 'FUT', shortName: 'FUT', ru: 'фут эспортс', logo: 'https://esports.ru/wp-content/uploads/2026/01/image_2026-01-11_120634098.png', url: 'https://esports.ru/counter-strike-2/teams/fut-esports-cs-go-cs2/',
       players: [
         { nick: 'Krabeni',   first: 'Аулон',   last: 'Фазлия',          flag: 'xk', url: 'https://esports.ru/counter-strike-2/players/krabeni-cs2/' },
         { nick: 'dem0n',     first: 'Дмитрий', last: 'Мирошниченко',    flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/dem0n-038a4280-095e-4e94-964b-cd78325471a6-cs2/' },
@@ -700,7 +783,7 @@ const DB = {
       ]
     },
     nrg: {
-      name: 'NRG', shortName: 'NRG', ru: 'нрг', logo: 'https://esports.ru/wp-content/uploads/2025/11/nrg1-1.png', url: 'https://esports.ru/teams/nrg-cs2/',
+      name: 'NRG', shortName: 'NRG', ru: 'нрг', logo: 'https://esports.ru/wp-content/uploads/2025/11/nrg1-1.png', url: 'https://esports.ru/counter-strike-2/teams/nrg-cs2/',
       players: [
         { nick: 'nitr0',  first: 'Ник',      last: 'Каннелла',  flag: 'us', url: 'https://esports.ru/counter-strike-2/players/nitr0-cs2/' },
         { nick: 'Jeorge', first: 'Джордж',   last: 'Эндикотт',  flag: 'us', url: 'https://esports.ru/counter-strike-2/players/jeorgesnorts-cs2/' },
@@ -710,7 +793,7 @@ const DB = {
       ]
     },
     b8: {
-      name: 'B8 Esports', shortName: 'B8', ru: 'б8 эспортс', logo: 'https://esports.ru/wp-content/uploads/2025/11/b81-2.png', url: 'https://esports.ru/teams/b8-cs2/',
+      name: 'B8 Esports', shortName: 'B8', ru: 'б8 эспортс', logo: 'https://esports.ru/wp-content/uploads/2025/11/b81-2.png', url: 'https://esports.ru/counter-strike-2/teams/b8-cs2/',
       players: [
         { nick: 'npl',      first: 'Андрей',          last: 'Кухарский',  flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/nipl-cs2/' },
         { nick: 'esenthial',first: 'Дмитрий',         last: 'Цвирь',      flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/esenthial-cs2/' },
@@ -720,7 +803,7 @@ const DB = {
       ]
     },
     mongolz: {
-      name: 'The MongolZ', shortName: 'MongolZ', ru: 'монголз', logo: 'https://esports.ru/wp-content/uploads/2025/02/image_2025-02-20_184108690.png', url: 'https://esports.ru/teams/mongolz-cs2/',
+      name: 'The MongolZ', shortName: 'MongolZ', ru: 'монголз', logo: 'https://esports.ru/wp-content/uploads/2025/02/image_2025-02-20_184108690.png', url: 'https://esports.ru/counter-strike-2/teams/mongolz-cs2/',
       players: [
         { nick: 'tikuak',      first: 'Зольбаяр',    last: 'Чимедцерен', flag: 'mn', url: 'https://esports.ru/counter-strike-2/players/tikuak-cs2/' },
         { nick: 'DarkMeister', first: 'Дугарсурен',  last: 'Иреэдуй',    flag: 'mn', url: 'https://esports.ru/counter-strike-2/players/darkmeister-cs2/' },
@@ -730,7 +813,7 @@ const DB = {
       ]
     },
     g2: {
-      name: 'G2 Esports', shortName: 'G2', ru: 'же два эспортс', logo: 'https://esports.ru/wp-content/uploads/2025/07/g2.png', url: 'https://esports.ru/teams/g2-cs2/',
+      name: 'G2 Esports', shortName: 'G2', ru: 'же два эспортс', logo: 'https://esports.ru/wp-content/uploads/2025/07/g2.png', url: 'https://esports.ru/counter-strike-2/teams/g2-cs2/',
       players: [
         { nick: 'MATYS',    first: 'Матуш',   last: 'Шимко',   flag: 'sk', url: 'https://esports.ru/counter-strike-2/players/matys-cs2/' },
         { nick: 'huNter-',  first: 'Неманья', last: 'Ковач',   flag: 'ba', url: 'https://esports.ru/counter-strike-2/players/hunter-73ecaf4a-54ec-4486-ba21-062da9b043a6-cs2/' },
@@ -740,7 +823,7 @@ const DB = {
       ]
     },
     legacy: {
-      name: 'Legacy', shortName: 'Legacy', ru: 'легаси', logo: 'https://esports.ru/wp-content/uploads/2025/11/legacy-1.png', url: 'https://esports.ru/teams/legacy-br-cs2/',
+      name: 'Legacy', shortName: 'Legacy', ru: 'легаси', logo: 'https://esports.ru/wp-content/uploads/2025/11/legacy-1.png', url: 'https://esports.ru/counter-strike-2/teams/legacy-br-cs2/',
       players: [
         { nick: 'latto',   first: 'Бруно',    last: 'Ребелатто', flag: 'br', url: 'https://esports.ru/counter-strike-2/players/latto-cs2/' },
         { nick: 'dumau',   first: 'Эдуард',   last: 'Волкмер',   flag: 'br', url: 'https://esports.ru/counter-strike-2/players/dumau-cs2/' },
@@ -750,7 +833,7 @@ const DB = {
       ]
     },
     bcgame: {
-      name: 'BC.Game', shortName: 'BC.Game', ru: 'бс гейм', logo: 'https://esports.ru/wp-content/uploads/2024/11/bc-game.png', url: 'https://esports.ru/teams/bc-game-cs2/',
+      name: 'BC.Game', shortName: 'BC.Game', ru: 'бс гейм', logo: 'https://esports.ru/wp-content/uploads/2024/11/bc-game.png', url: 'https://esports.ru/counter-strike-2/teams/bc-game-cs2/',
       players: [
         { nick: 's1mple',    first: 'Александр', last: 'Костылев', flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/s1mple-cs2/' },
         { nick: 'electroNic',first: 'Денис',     last: 'Шарипов',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/electronic-cs2/' },
@@ -760,7 +843,7 @@ const DB = {
       ]
     },
     mouz: {
-      name: 'MOUZ', shortName: 'MOUZ', ru: 'мауз', logo: 'https://esports.ru/wp-content/uploads/2024/11/mouz.png', url: 'https://esports.ru/teams/mouz-cs2/',
+      name: 'MOUZ', shortName: 'MOUZ', ru: 'мауз', logo: 'https://esports.ru/wp-content/uploads/2024/11/mouz.png', url: 'https://esports.ru/counter-strike-2/teams/mouz-cs2/',
       players: [
         { nick: 'torzsi',   first: 'Адам',    last: 'Торжаш',  flag: 'hu', url: 'https://esports.ru/counter-strike-2/players/torzsi-1be0771e-48dc-4763-8c6e-370a801d70cd-cs2/' },
         { nick: 'xertioN',  first: 'Дориан',  last: 'Берман',  flag: 'il', url: 'https://esports.ru/counter-strike-2/players/xertionic-cs2/' },
@@ -770,7 +853,7 @@ const DB = {
       ]
     },
     monte: {
-      name: 'Monte', shortName: 'Monte', ru: 'монте', logo: 'https://esports.ru/wp-content/uploads/2024/11/monte.png', url: 'https://esports.ru/teams/monte-cs2/',
+      name: 'Monte', shortName: 'Monte', ru: 'монте', logo: 'https://esports.ru/wp-content/uploads/2024/11/monte.png', url: 'https://esports.ru/counter-strike-2/teams/monte-cs2/',
       players: [
         { nick: 'Rainwaker', first: 'Алекс',    last: 'Петров',            flag: 'bg', url: 'https://esports.ru/counter-strike-2/players/rainwaker-cs2/' },
         { nick: 'Bymas',     first: 'Ауримас',  last: 'Пипирас',           flag: 'lt', url: 'https://esports.ru/counter-strike-2/players/bymas-cs2/' },
@@ -780,7 +863,7 @@ const DB = {
       ]
     },
     m80: {
-      name: 'M80', shortName: 'M80', ru: 'м80', logo: 'https://esports.ru/wp-content/uploads/2025/11/m80-2.png', url: 'https://esports.ru/teams/m80-cs2/',
+      name: 'M80', shortName: 'M80', ru: 'м80', logo: 'https://esports.ru/wp-content/uploads/2025/11/m80-2.png', url: 'https://esports.ru/counter-strike-2/teams/m80-cs2/',
       players: [
         { nick: 'Swisher', first: 'Майкл', last: 'Шмид',      flag: 'us', url: 'https://esports.ru/counter-strike-2/players/swisher-b19c529c-f6c9-4491-82d9-6105e34ead0e-cs2/' },
         { nick: 'JBa',     first: 'Джош',  last: 'Барутт',    flag: 'us', url: 'https://esports.ru/counter-strike-2/players/jba-cs2/' },
@@ -790,7 +873,7 @@ const DB = {
       ]
     },
     gladiators: {
-      name: 'Gaimin Gladiators', shortName: 'GG', ru: 'геймин гладиаторы', logo: 'https://esports.ru/wp-content/uploads/2024/11/gladiators-1.png', url: 'https://esports.ru/teams/gaimin-gladiators-cs2/',
+      name: 'Gaimin Gladiators', shortName: 'GG', ru: 'геймин гладиаторы', logo: 'https://esports.ru/wp-content/uploads/2024/11/gladiators-1.png', url: 'https://esports.ru/counter-strike-2/teams/gaimin-gladiators-cs2/',
       players: [
         { nick: 'HEN1',  first: 'Энрике',   last: 'Телес',     flag: 'br', url: 'https://esports.ru/counter-strike-2/players/hen1-cs2/' },
         { nick: 'fer',   first: 'Фернандо', last: 'Альваренга',flag: 'br', url: 'https://esports.ru/counter-strike-2/players/fer-217fd65b-3fb3-435d-ab73-766ad95a85c2-cs2/' },
@@ -800,7 +883,7 @@ const DB = {
       ]
     },
     semperfi: {
-      name: 'SemperFi', shortName: 'SemperFi', ru: 'семпер фи', logo: 'https://esports.ru/wp-content/uploads/2026/02/game.png12.png', url: 'https://esports.ru/teams/semperfi-esports-cs2/',
+      name: 'SemperFi', shortName: 'SemperFi', ru: 'семпер фи', logo: 'https://esports.ru/wp-content/uploads/2026/02/game.png12.png', url: 'https://esports.ru/counter-strike-2/teams/semperfi-esports-cs2/',
       players: [
         { nick: 'hazr',   first: 'Джаред',    last: 'О\'Бри',      flag: 'au', url: 'https://esports.ru/counter-strike-2/players/hazr-cs2/' },
         { nick: 'keen',   first: 'Кристерс',  last: 'Дарзниекс',   flag: 'lv', url: 'https://esports.ru/counter-strike-2/players/keen-d12be471-43d2-4ee4-8d8b-3fdee115e4e1-cs2/' },
@@ -810,7 +893,7 @@ const DB = {
       ]
     },
     ninez: {
-      name: '9z', shortName: '9z', ru: 'девять зет', logo: 'https://esports.ru/wp-content/uploads/2024/05/9z_team_2024_darkmode.svg', url: 'https://esports.ru/teams/9z-cs2/',
+      name: '9z', shortName: '9z', ru: 'девять зет', logo: 'https://esports.ru/wp-content/uploads/2024/05/9z_team_2024_darkmode.svg', url: 'https://esports.ru/counter-strike-2/teams/9z-cs2/',
       players: [
         { nick: 'max',       first: 'Максимилиано', last: 'Гонсалес',          flag: 'uy', url: 'https://esports.ru/counter-strike-2/players/maxujas-maximiliano-gonzalez-cs2/' },
         { nick: 'dgt',       first: 'Франко',       last: 'Гарсия',            flag: 'uy', url: 'https://esports.ru/counter-strike-2/players/dgt-cs2/' },
@@ -820,7 +903,7 @@ const DB = {
       ]
     },
     tyloo: {
-      name: 'TYLOO', shortName: 'TYLOO', ru: 'тайлу', logo: 'https://esports.ru/wp-content/uploads/2025/11/tyloo.png', url: 'https://esports.ru/teams/tyloo-cs2/',
+      name: 'TYLOO', shortName: 'TYLOO', ru: 'тайлу', logo: 'https://esports.ru/wp-content/uploads/2025/11/tyloo.png', url: 'https://esports.ru/counter-strike-2/teams/tyloo-cs2/',
       players: [
         { nick: 'Mercury',  first: 'Цзиньсян', last: 'Ван',         flag: 'cn', url: 'https://esports.ru/counter-strike-2/players/mercury-8c24d7c8-7e41-4a6c-a13d-af89c0aee678-cs2/' },
         { nick: 'Moseyuh',  first: 'Цянь Хао', last: 'Чен',         flag: 'cn', url: 'https://esports.ru/counter-strike-2/players/moseyuh-cs2/' },
@@ -830,7 +913,7 @@ const DB = {
       ]
     },
     eyeballers: {
-      name: 'EYEBALLERS', shortName: 'EYEBALLERS', ru: 'айболлерс', logo: 'https://esports.ru/wp-content/uploads/2026/01/image_2026-01-11_120823697.png', url: 'https://esports.ru/teams/eyeballers-cs2/',
+      name: 'EYEBALLERS', shortName: 'EYEBALLERS', ru: 'айболлерс', logo: 'https://esports.ru/wp-content/uploads/2026/01/image_2026-01-11_120823697.png', url: 'https://esports.ru/counter-strike-2/teams/eyeballers-cs2/',
       players: [
         { nick: 'JW',       first: 'Йеспер',   last: 'Вексель',       flag: 'se', url: 'https://esports.ru/counter-strike-2/players/jw-cs2/' },
         { nick: 'dex',      first: 'Себастиан',last: 'Самуэльссон',   flag: 'se', url: 'https://esports.ru/counter-strike-2/players/dex-c6e4f77e-d701-4efe-af38-b7d996f30dbb-cs2/' },
@@ -840,7 +923,7 @@ const DB = {
       ]
     },
     mibr: {
-      name: 'MIBR', shortName: 'MIBR', ru: 'мейд ин бразил мибр', logo: 'https://esports.ru/wp-content/uploads/2024/11/mibr-white.png', url: 'https://esports.ru/teams/made-in-brazil-cs2/',
+      name: 'MIBR', shortName: 'MIBR', ru: 'мейд ин бразил мибр', logo: 'https://esports.ru/wp-content/uploads/2024/11/mibr-white.png', url: 'https://esports.ru/counter-strike-2/teams/made-in-brazil-cs2/',
       players: [
         { nick: 'LNZ',       first: 'Линус',    last: 'Хольтенг',    flag: 'se', url: 'https://esports.ru/counter-strike-2/players/lnz-cs2/' },
         { nick: 'brnz4n',    first: 'Брено',    last: 'Полетто',     flag: 'br', url: 'https://esports.ru/counter-strike-2/players/brnz4n-cs2/' },
@@ -850,7 +933,7 @@ const DB = {
       ]
     },
     innercircle: {
-      name: 'Inner Circle', shortName: 'IC', ru: 'иннер сёркл', logo: 'https://esports.ru/wp-content/uploads/2026/04/inner_circle_esports_lightmode.png1_-768x887.png', url: 'https://esports.ru/teams/inner-circle-esports-cs2/',
+      name: 'Inner Circle', shortName: 'IC', ru: 'иннер сёркл', logo: 'https://esports.ru/wp-content/uploads/2026/04/inner_circle_esports_lightmode.png1_-768x887.png', url: 'https://esports.ru/counter-strike-2/teams/inner-circle-esports-cs2/',
       players: [
         { nick: 'onic',         first: 'Виктор',  last: 'Бабий',         flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/onic-cs2/' },
         { nick: 'zeRRoFIX',     first: 'Эдуард',  last: 'Петровский',    flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/zerrofix-cs2/' },
@@ -860,7 +943,7 @@ const DB = {
       ]
     },
     wildcard: {
-      name: 'Wildcard Gaming', shortName: 'Wildcard', ru: 'вайлдкард гейминг', logo: 'https://esports.ru/wp-content/uploads/2025/05/photo_2025-05-15_10-36-15-photoroom.png', url: 'https://esports.ru/teams/wildcard-cs2-2/',
+      name: 'Wildcard Gaming', shortName: 'Wildcard', ru: 'вайлдкард гейминг', logo: 'https://esports.ru/wp-content/uploads/2025/05/photo_2025-05-15_10-36-15-photoroom.png', url: 'https://esports.ru/counter-strike-2/teams/wildcard-cs2-2/',
       players: [
         { nick: 'nEMANHA', first: 'Неманья', last: 'Дукич',       flag: 'rs', url: 'https://esports.ru/counter-strike-2/players/nemanha-cs2/' },
         { nick: 'cxzi',    first: 'Дэнни',   last: 'Стржельчик',  flag: 'us', url: 'https://esports.ru/counter-strike-2/players/cxzi-fe913b20-0a74-4f6c-9647-ac84e38f9e32-cs2/' },
@@ -870,7 +953,7 @@ const DB = {
       ]
     },
     fokus: {
-      name: 'FOKUS', shortName: 'FOKUS', ru: 'фокус', logo: 'https://esports.ru/wp-content/uploads/2026/04/image_2026-04-02_133641740.png', url: 'https://esports.ru/teams/fokus-cs-go-cs2/',
+      name: 'FOKUS', shortName: 'FOKUS', ru: 'фокус', logo: 'https://esports.ru/wp-content/uploads/2026/04/image_2026-04-02_133641740.png', url: 'https://esports.ru/counter-strike-2/teams/fokus-cs-go-cs2/',
       players: [
         { nick: 'ztr',     first: 'Эрик',    last: 'Густафссон', flag: 'se', url: 'https://esports.ru/players/ztr-cs2/' },
         { nick: 'podi',    first: 'Пааво',   last: 'Хейсканен',  flag: 'se', url: 'https://esports.ru/counter-strike-2/players/podi-cs2/' },
@@ -880,7 +963,7 @@ const DB = {
       ]
     },
     betboom: {
-      name: 'BetBoom Team', shortName: 'BetBoom', ru: 'бетбум', logo: 'https://esports.ru/wp-content/uploads/2025/08/image_2025-08-27_191722083.png', url: 'https://esports.ru/teams/betboom-cs2/',
+      name: 'BetBoom Team', shortName: 'BetBoom', ru: 'бетбум', logo: 'https://esports.ru/wp-content/uploads/2025/08/image_2025-08-27_191722083.png', url: 'https://esports.ru/counter-strike-2/teams/betboom-cs2/',
       players: [
         { nick: 'Boombl4',  first: 'Кирилл',    last: 'Михайлов',      flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/boombl4-cs2/' },
         { nick: 'Magnojez', first: 'Кирилл',    last: 'Роднов',        flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/magnojez-cs2/' },
@@ -890,7 +973,7 @@ const DB = {
       ]
     },
     sinners: {
-      name: 'SINNERS', shortName: 'SINNERS', ru: 'синнерс', logo: 'https://esports.ru/wp-content/uploads/2026/01/group-2087325931.png', url: 'https://esports.ru/teams/sinners-cz-cs2/',
+      name: 'SINNERS', shortName: 'SINNERS', ru: 'синнерс', logo: 'https://esports.ru/wp-content/uploads/2026/01/group-2087325931.png', url: 'https://esports.ru/counter-strike-2/teams/sinners-cz-cs2/',
       players: [
         { nick: 'beastik',    first: 'Себастьян',       last: 'Дано',      flag: 'cz', url: 'https://esports.ru/counter-strike-2/players/beastik-cs2/' },
         { nick: 'SHOCK',      first: 'Макс',            last: 'Квапил',    flag: 'cz', url: 'https://esports.ru/counter-strike-2/players/shock-max-kvapil-cs2/' },
@@ -900,7 +983,7 @@ const DB = {
       ]
     },
     sharks: {
-      name: 'Sharks', shortName: 'Sharks', ru: 'шаркс акулы', logo: 'https://esports.ru/wp-content/uploads/2026/05/sharks.png', url: 'https://esports.ru/teams/sharks-cs2/',
+      name: 'Sharks', shortName: 'Sharks', ru: 'шаркс акулы', logo: 'https://esports.ru/wp-content/uploads/2026/05/sharks.png', url: 'https://esports.ru/counter-strike-2/teams/sharks-cs2/',
       players: [
         { nick: 'Gafolo',   first: 'Виктор',  last: 'Андраде',   flag: 'br', url: 'https://esports.ru/counter-strike-2/players/gafolo-cs2/' },
         { nick: 'rdnzao',   first: 'Даниэл',  last: 'Монтейро',  flag: 'br', url: 'https://esports.ru/counter-strike-2/players/rdnzao-cs2/' },
@@ -910,7 +993,7 @@ const DB = {
       ]
     },
     big: {
-      name: 'BIG', shortName: 'BIG', ru: 'биг', logo: 'https://esports.ru/wp-content/uploads/2024/11/big-white.png', url: 'https://esports.ru/teams/big-cs2/',
+      name: 'BIG', shortName: 'BIG', ru: 'биг', logo: 'https://esports.ru/wp-content/uploads/2024/11/big-white.png', url: 'https://esports.ru/counter-strike-2/teams/big-cs2/',
       players: [
         { nick: 'tabseN',  first: 'Йоханнс',  last: 'Водарц',    flag: 'de', url: 'https://esports.ru/counter-strike-2/players/tabsen-cs2/' },
         { nick: 'JDC',     first: 'Джон',     last: 'де Кастро', flag: 'de', url: 'https://esports.ru/counter-strike-2/players/jdc-cs2/' },
@@ -920,7 +1003,7 @@ const DB = {
       ]
     },
     flyquest: {
-      name: 'FlyQuest', shortName: 'FlyQuest', ru: 'флайквест', logo: 'https://esports.ru/wp-content/uploads/2025/11/flyquest1-2.png', url: 'https://esports.ru/teams/flyquest-cs2/',
+      name: 'FlyQuest', shortName: 'FlyQuest', ru: 'флайквест', logo: 'https://esports.ru/wp-content/uploads/2025/11/flyquest1-2.png', url: 'https://esports.ru/counter-strike-2/teams/flyquest-cs2/',
       players: [
         { nick: 'INS',    first: 'Джошуа',  last: 'Поттер',   flag: 'au', url: 'https://esports.ru/counter-strike-2/players/ins-cs2/' },
         { nick: 'jks',    first: 'Джастин', last: 'Сэведж',   flag: 'au', url: 'https://esports.ru/counter-strike-2/players/jks-cs2/' },
@@ -930,10 +1013,10 @@ const DB = {
       ]
     },
     betm33: {
-      name: 'BET-M 33', shortName: '33', ru: 'бет эм 33', logo: 'https://esports.ru/wp-content/uploads/2026/03/t104921.png', url: 'https://esports.ru/teams/33-cs2/',
+      name: 'BET-M 33', shortName: '33', ru: 'бет эм 33', logo: 'https://esports.ru/wp-content/uploads/2026/03/t104921.png', url: 'https://esports.ru/counter-strike-2/teams/33-cs2/',
       players: [
         { nick: 'kinqie',    first: 'Семён',    last: 'Лисицын',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/kinqie-cs2/' },
-        { nick: 'fluffy',    first: 'Владислав',last: 'Галимов',  flag: 'ru', url: 'https://esports.ru/teams/33-cs2/' },
+        { nick: 'fluffy',    first: 'Владислав',last: 'Галимов',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/teams/33-cs2/' },
         { nick: 'z1Nny',     first: 'Павел',    last: 'Прокопьев',flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/z1nny-cs2/' },
         { nick: 'executor',  first: 'Илья',     last: 'Вебер',    flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/executor-cs2/' },
         { nick: 'bluewh1te', first: 'Любсан',   last: 'Мулонов',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/bluewhite-cs2/' },
@@ -970,7 +1053,7 @@ const DB = {
       ]
     },
     hotu: {
-      name: 'HOTU', shortName: 'HOTU', ru: 'хоту', logo: 'https://esports.ru/wp-content/uploads/2025/04/image_2025-04-02_111739082.png', url: 'https://esports.ru/teams/hotu-cs2/',
+      name: 'HOTU', shortName: 'HOTU', ru: 'хоту', logo: 'https://esports.ru/wp-content/uploads/2025/04/image_2025-04-02_111739082.png', url: 'https://esports.ru/counter-strike-2/teams/hotu-cs2/',
       players: [
         { nick: 'n0rb3r7',   first: 'Давид',      last: 'Даниелян',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/n0rb3r7-cs2/' },
         { nick: 'dwushka',   first: 'Александр',  last: 'Пахневич',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/dwushka-cs2/' },
@@ -980,7 +1063,7 @@ const DB = {
       ]
     },
     gentlemates: {
-      name: 'Gentle Mates', shortName: 'GM', ru: 'джентл мэйтс', logo: 'https://esports.ru/wp-content/uploads/2026/03/gentle-mates.png', url: 'https://esports.ru/teams/gentle-mates-cs-go-cs2/',
+      name: 'Gentle Mates', shortName: 'GM', ru: 'джентл мэйтс', logo: 'https://esports.ru/wp-content/uploads/2026/03/gentle-mates.png', url: 'https://esports.ru/counter-strike-2/teams/gentle-mates-cs-go-cs2/',
       players: [
         { nick: 'alex',    first: 'Алехандро', last: 'Масанет',  flag: 'es', url: 'https://esports.ru/counter-strike-2/players/alex-315d6783-83fa-4901-9193-dcfcc14c84bd-cs2/' },
         { nick: 'mopoz',   first: 'Алехандро', last: 'Кано',     flag: 'es', url: 'https://esports.ru/counter-strike-2/players/mopoz-cs2/' },
@@ -990,7 +1073,7 @@ const DB = {
       ]
     },
     redcanids: {
-      name: 'RED Canids', shortName: 'RED', ru: 'рэд канидс', logo: 'https://esports.ru/wp-content/uploads/2025/11/rc-1-64x64.png', url: 'https://esports.ru/teams/red-canids-cs2/',
+      name: 'RED Canids', shortName: 'RED', ru: 'рэд канидс', logo: 'https://esports.ru/wp-content/uploads/2025/11/rc-1-64x64.png', url: 'https://esports.ru/counter-strike-2/teams/red-canids-cs2/',
       players: [
         { nick: 'reNTU',      first: 'Ренан',  last: 'Кардозо', flag: 'br', url: 'https://esports.ru/counter-strike-2/players/rentu-cs2/' },
         { nick: 'drop',       first: 'Андре',  last: 'Абреу',   flag: 'br', url: 'https://esports.ru/counter-strike-2/players/drop-andre-abreu-cs2/' },
@@ -1000,7 +1083,7 @@ const DB = {
       ]
     },
     magic: {
-      name: 'magic', shortName: 'magic', ru: 'мэджик', logo: 'https://esports.ru/wp-content/uploads/2026/03/t91995.png1_.png', url: 'https://esports.ru/teams/magic-cs-go-cs2/',
+      name: 'magic', shortName: 'magic', ru: 'мэджик', logo: 'https://esports.ru/wp-content/uploads/2026/03/t91995.png1_.png', url: 'https://esports.ru/counter-strike-2/teams/magic-cs-go-cs2/',
       players: [
         { nick: 'MaSvAl', first: 'Святослав', last: 'Маско',    flag: 'by', url: 'https://esports.ru/counter-strike-2/players/masval-cs2/' },
         { nick: 'tENZY',  first: 'Никита',    last: 'Коченюк',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/tenzy-cs2/' },
@@ -1010,7 +1093,7 @@ const DB = {
       ]
     },
     huns: {
-      name: 'The Huns', shortName: 'Huns', ru: 'хунс', logo: 'https://esports.ru/wp-content/uploads/2025/11/the-huns-1.png', url: 'https://esports.ru/teams/huns-cs2/',
+      name: 'The Huns', shortName: 'Huns', ru: 'хунс', logo: 'https://esports.ru/wp-content/uploads/2025/11/the-huns-1.png', url: 'https://esports.ru/counter-strike-2/teams/huns-cs2/',
       players: [
         { nick: 'nin9',      first: 'Есунтумур', last: 'Гантулга',   flag: 'mn', url: 'https://esports.ru/counter-strike-2/players/nin9-cs2/' },
         { nick: 'Bart4k',    first: 'Баатархуу', last: 'Батболд',    flag: 'mn', url: 'https://esports.ru/counter-strike-2/players/bart4k-cs2/' },
@@ -1020,7 +1103,7 @@ const DB = {
       ]
     },
     fishercollege: {
-      name: 'Fisher College', shortName: 'Fisher', ru: 'фишер колледж', logo: 'https://esports.ru/wp-content/uploads/2026/05/image-6.png', url: 'https://esports.ru/teams/fisher-college-cs2/',
+      name: 'Fisher College', shortName: 'Fisher', ru: 'фишер колледж', logo: 'https://esports.ru/wp-content/uploads/2026/05/image-6.png', url: 'https://esports.ru/counter-strike-2/teams/fisher-college-cs2/',
       players: [
         { nick: 'neaLaN',  first: 'Санжар',    last: 'Исхаков',       flag: 'kz', url: 'https://esports.ru/counter-strike-2/players/nealan-cs2/' },
         { nick: 'corn',    first: 'Томми',     last: 'Экхарт',        flag: 'us', url: 'https://esports.ru/counter-strike-2/players/corn-966eefbf-ac3e-4fa4-bdb2-9bfd0ddc7657-cs2/' },
@@ -1030,7 +1113,7 @@ const DB = {
       ]
     },
     k27: {
-      name: 'K27', shortName: 'K27', ru: 'к27', logo: 'https://esports.ru/wp-content/uploads/2026/03/k27.png', url: 'https://esports.ru/teams/k27-cs2/',
+      name: 'K27', shortName: 'K27', ru: 'к27', logo: 'https://esports.ru/wp-content/uploads/2026/03/k27.png', url: 'https://esports.ru/counter-strike-2/teams/k27-cs2/',
       players: [
         { nick: 'kashl1d', first: 'Данила',  last: 'Дронов',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/kashl1d-cs2/' },
         { nick: 'qw1nk1',  first: 'Даниил',  last: 'Кабилов',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/qw1nk1-cs2/' },
@@ -1040,7 +1123,7 @@ const DB = {
       ]
     },
     lynnvision: {
-      name: 'Lynn Vision', shortName: 'LVG', ru: 'линн вижн', logo: 'https://esports.ru/wp-content/uploads/2024/11/lynn-vision-64x64.png', url: 'https://esports.ru/teams/lynn-vision-cs2/',
+      name: 'Lynn Vision', shortName: 'LVG', ru: 'линн вижн', logo: 'https://esports.ru/wp-content/uploads/2024/11/lynn-vision-64x64.png', url: 'https://esports.ru/counter-strike-2/teams/lynn-vision-cs2/',
       players: [
         { nick: 'Westmelon',  first: 'Ню',   last: 'Чжэ',        flag: 'cn', url: 'https://esports.ru/counter-strike-2/players/xg-cs2/' },
         { nick: 'z4kr',       first: 'Чжан', last: 'Сике',       flag: 'cn', url: 'https://esports.ru/counter-strike-2/players/mitsuha-cs2/' },
@@ -1050,7 +1133,7 @@ const DB = {
       ]
     },
     thunderdownunder: {
-      name: 'THUNDER dOWNUNDER', shortName: 'TDU', ru: 'тандер даунандер', logo: 'https://esports.ru/wp-content/uploads/2026/05/td.png', url: 'https://esports.ru/teams/thunder-downunder-cs2/',
+      name: 'THUNDER dOWNUNDER', shortName: 'TDU', ru: 'тандер даунандер', logo: 'https://esports.ru/wp-content/uploads/2026/05/td.png', url: 'https://esports.ru/counter-strike-2/teams/thunder-downunder-cs2/',
       players: [
         { nick: 'dexter',   first: 'Кристофер', last: 'Нонг',      flag: 'au', url: 'https://esports.ru/counter-strike-2/players/dexter-8d37d568-cd29-4740-a353-8b412c77d898-cs2/' },
         { nick: 'Liazz',    first: 'Джей',      last: 'Трегильяс', flag: 'au', url: 'https://esports.ru/counter-strike-2/players/liazz-cs2/' },
@@ -1070,7 +1153,7 @@ const DB = {
       ]
     },
     nemesis: {
-      name: 'Team Nemesis', shortName: 'Nemesis', ru: 'немезис', logo: 'https://esports.ru/wp-content/uploads/2026/03/600px-team_nem_darkmode.png', url: 'https://esports.ru/teams/team-nemesis-cs-go-cs2/',
+      name: 'Team Nemesis', shortName: 'Nemesis', ru: 'немезис', logo: 'https://esports.ru/wp-content/uploads/2026/03/600px-team_nem_darkmode.png', url: 'https://esports.ru/counter-strike-2/teams/team-nemesis-cs-go-cs2/',
       players: [
         { nick: 'SELLTER',  first: 'Иван',      last: 'Мирошников',     flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/sellter-cs2/' },
         { nick: 'mag1k3Y',  first: 'Алемхан',   last: 'Молдакамалов',   flag: 'kz', url: 'https://esports.ru/counter-strike-2/players/mag1k3y-cs2/' },
@@ -1080,7 +1163,7 @@ const DB = {
       ]
     },
     nucleartiger: {
-      name: 'Nuclear TigeRES', shortName: 'NTR', ru: 'нуклеар тигрес', logo: 'https://esports.ru/wp-content/uploads/2025/09/nuclear.png', url: 'https://esports.ru/teams/nuclear-tigres-cs2',
+      name: 'Nuclear TigeRES', shortName: 'NTR', ru: 'нуклеар тигрес', logo: 'https://esports.ru/wp-content/uploads/2025/09/nuclear.png', url: 'https://esports.ru/counter-strike-2/teams/nuclear-tigres-cs2',
       players: [
         { nick: 'senka',    first: 'Арсений', last: 'Козловский',  flag: 'by', url: 'https://esports.ru/counter-strike-2/players/senkaaaaa-cs2/' },
         { nick: 'Flouzer',  first: 'Илья',    last: 'Селифонов',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/flouzer-cs2/' },
@@ -1090,7 +1173,7 @@ const DB = {
       ]
     },
     og: {
-      name: 'OG', shortName: 'OG', ru: 'ог', logo: 'https://esports.ru/wp-content/uploads/2026/02/imgi_160_73px-og_2026_allmode.png', url: 'https://esports.ru/teams/og-cs2/',
+      name: 'OG', shortName: 'OG', ru: 'ог', logo: 'https://esports.ru/wp-content/uploads/2026/02/imgi_160_73px-og_2026_allmode.png', url: 'https://esports.ru/counter-strike-2/teams/og-cs2/',
       players: [
         { nick: 'spooke',     first: 'Олле',      last: 'Грюндстрем',  flag: 'se', url: 'https://esports.ru/counter-strike-2/players/spooke-cs2/' },
         { nick: 'adamb',      first: 'Адам',      last: 'Ангстрем',    flag: 'se', url: 'https://esports.ru/counter-strike-2/players/adamb-cs2/' },
@@ -1100,7 +1183,7 @@ const DB = {
       ]
     },
     nemiga: {
-      name: 'Nemiga Gaming', shortName: 'Nemiga', ru: 'немига', logo: 'https://esports.ru/wp-content/uploads/2025/09/nemigaa.png', url: 'https://esports.ru/teams/nemiga-cs2/',
+      name: 'Nemiga Gaming', shortName: 'Nemiga', ru: 'немига', logo: 'https://esports.ru/wp-content/uploads/2025/09/nemigaa.png', url: 'https://esports.ru/counter-strike-2/teams/nemiga-cs2/',
       players: [
         { nick: 'robo',    first: 'Никита',    last: 'Душин',         flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/robo-nikita-dushin-cs2/' },
         { nick: 'KaiR0N',  first: 'Александр', last: 'Анашкин',       flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/kair0n-cs2/' },
@@ -1110,7 +1193,7 @@ const DB = {
       ]
     },
     vp: {
-      name: 'Virtus.pro', shortName: 'VP', ru: 'виртус про вп', logo: 'https://esports.ru/wp-content/uploads/2024/11/virtus-pro-1.png', url: 'https://esports.ru/teams/virtus-pro-cs2/',
+      name: 'Virtus.pro', shortName: 'VP', ru: 'виртус про вп', logo: 'https://esports.ru/wp-content/uploads/2024/11/virtus-pro-1.png', url: 'https://esports.ru/counter-strike-2/teams/virtus-pro-cs2/',
       players: [
         { nick: 'b1st',     first: 'Владимир', last: 'Красиков', flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/b1st-cs2/' },
         { nick: 'tO0RO',    first: 'Вадим',    last: 'Арьков',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/to0ro-cs2/' },
@@ -1120,7 +1203,7 @@ const DB = {
       ]
     },
     arcred: {
-      name: 'ARCRED', shortName: 'ARCRED', ru: 'аркред', logo: 'https://esports.ru/wp-content/uploads/2026/03/195px-arcred_2023_allmode.png', url: 'https://esports.ru/teams/arcred-cs2/',
+      name: 'ARCRED', shortName: 'ARCRED', ru: 'аркред', logo: 'https://esports.ru/wp-content/uploads/2026/03/195px-arcred_2023_allmode.png', url: 'https://esports.ru/counter-strike-2/teams/arcred-cs2/',
       players: [
         { nick: 'Get_Jeka', first: 'Евгений',    last: 'Смакило',   flag: 'by', url: 'https://esports.ru/counter-strike-2/players/get-jeka-cs2/' },
         { nick: 'Ryujin', first: 'Борис',      last: 'Ким',       flag: 'uz', url: 'https://esports.ru/counter-strike-2/players/ryujin-05d9fbb0-2aa6-4e36-ae6f-cb98f04dea44-cs2/' },
@@ -1130,7 +1213,7 @@ const DB = {
       ]
     },
     wwteam: {
-      name: 'WW Team', shortName: 'WW', ru: 'вв тим', logo: 'https://esports.ru/wp-content/uploads/2026/03/ww.png', url: 'https://esports.ru/teams/ww-cs2/',
+      name: 'WW Team', shortName: 'WW', ru: 'вв тим', logo: 'https://esports.ru/wp-content/uploads/2026/03/ww.png', url: 'https://esports.ru/counter-strike-2/teams/ww-cs2/',
       players: [
         { nick: 'ct0m',    first: 'Артём',     last: 'Максимов',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/ct0m-cs2/' },
         { nick: 'StRoGo',  first: 'Иван',      last: 'Шурпатов',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/strogo-cs2/' },
@@ -1140,7 +1223,7 @@ const DB = {
       ]
     },
     voca: {
-      name: 'Voca', shortName: 'Voca', ru: 'вока', logo: 'https://esports.ru/wp-content/uploads/2026/04/image_2026-04-02_133730818.png', url: 'https://esports.ru/teams/voca-cs2/',
+      name: 'Voca', shortName: 'Voca', ru: 'вока', logo: 'https://esports.ru/wp-content/uploads/2026/04/image_2026-04-02_133730818.png', url: 'https://esports.ru/counter-strike-2/teams/voca-cs2/',
       players: [
         { nick: 'junior',  first: 'Пэйтин', last: 'Джонсон',   flag: 'us', url: 'https://esports.ru/counter-strike-2/players/junior-cs2/' },
         { nick: 'snav',    first: 'Вятт',   last: 'Филлиппи',  flag: 'us', url: 'https://esports.ru/counter-strike-2/players/snav-cs2/' },
@@ -1817,7 +1900,374 @@ document.getElementById('btn-parse-text').addEventListener('click', () => {
   parseHltvText(document.getElementById('hltv-paste').value);
 });
 
-// DRAG & DROP
+// GAME SWITCHER
+document.querySelectorAll('.game-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.game-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('game-' + btn.dataset.game).classList.add('active');
+  });
+});
+
+// VALORANT DB
+const DB_VAL = {
+  teams: {
+    prx: {
+      name: 'Paper Rex', shortName: 'PRX', ru: 'пейпер рекс',
+      logo: 'https://esports.ru/wp-content/uploads/2024/11/62bbebb185a7e-1.png',
+      url: 'https://esports.ru/valorant/teams/paper-rex-valorant/',
+      players: [
+        { nick: 'd4v41',     flag: 'my', url: 'https://esports.ru/players/d4v41-valorant/' },
+        { nick: 'f0rsakeN',  flag: 'id', url: 'https://esports.ru/valorant/players/f0rsaken-valorant/' },
+        { nick: 'something', flag: 'ru', url: 'https://esports.ru/valorant/players/smth-valorant/' },
+        { nick: 'Jinggg',    flag: 'sg', url: 'https://esports.ru/valorant/players/jinggg-valorant/' },
+        { nick: 'invy',      flag: 'ph', url: 'https://esports.ru/valorant/players/invy-valorant/' },
+      ]
+    },
+    g2val: {
+      name: 'G2 Esports', shortName: 'G2', ru: 'г2 джи 2',
+      logo: 'https://esports.ru/wp-content/uploads/2026/02/image_2026-02-26_162432326.png',
+      url: 'https://esports.ru/valorant/teams/g2-valorant/',
+      players: [
+        { nick: 'trent',   flag: 'us', url: 'https://esports.ru/valorant/players/habib-68856582-61a1-49e1-8cbc-31123f588c8f-valorant/' },
+        { nick: 'valyn',   flag: 'us', url: 'https://esports.ru/valorant/players/valyn-valorant/' },
+        { nick: 'leaf',    flag: 'us', url: 'https://esports.ru/valorant/players/leaf-nathan-orf-valorant/' },
+        { nick: 'jawgemo', flag: 'kh', url: 'https://esports.ru/valorant/players/jawgemo-valorant/' },
+        { nick: 'babybay', flag: 'us', url: 'https://esports.ru/valorant/players/babybay-valorant/' },
+      ]
+    },
+  }
+};
+
+// VALORANT: render player rows
+function valRenderPlayerRows(teamKey, containerId, labelId) {
+  const container = document.getElementById(containerId);
+  const label = document.getElementById(labelId);
+  if (!teamKey || !DB_VAL.teams[teamKey]) { container.innerHTML = ''; return; }
+  const team = DB_VAL.teams[teamKey];
+  if (label) label.textContent = team.name;
+
+  let html = `<div class="player-row-label">
+    <span>Игрок</span><span>KDA</span><span>ACS</span><span>ADR</span><span>Rating</span>
+  </div>`;
+  team.players.forEach((p, i) => {
+    html += `<div class="player-row">
+      <div class="player-nick-display" style="position:relative">
+        <img src="${FLAG}${p.flag}.svg" alt="${p.flag}" data-val-flag-img="${i}-${containerId}">
+        <span data-val-nick-text="${i}-${containerId}">" ${p.nick} "</span>
+        <button class="edit-player-btn" data-val-edit="${i}-${containerId}" title="Сменить игрока">✎</button>
+        <div class="player-edit-popup" id="val-popup-${i}-${containerId}">
+          <label>Страна (код флага)</label>
+          <input type="text" id="val-edit-flag-${i}-${containerId}" value="${p.flag}">
+          <label>Ник</label>
+          <input type="text" id="val-edit-nick-${i}-${containerId}" value="${p.nick}">
+          <label>Ссылка на игрока</label>
+          <input type="text" id="val-edit-url-${i}-${containerId}" value="${p.url || ''}">
+          <div class="popup-btns">
+            <button class="popup-btn-save" data-val-save="${i}-${containerId}">Сохранить</button>
+            <button class="popup-btn-cancel" data-val-cancel="${i}-${containerId}">Отмена</button>
+          </div>
+        </div>
+      </div>
+      <input type="text" placeholder="1/2/3" data-player="${i}" data-field="kda">
+      <input type="text" placeholder="220"   data-player="${i}" data-field="acs">
+      <input type="text" placeholder="140"   data-player="${i}" data-field="adr">
+      <input type="text" placeholder="1.15"  data-player="${i}" data-field="rating">
+    </div>`;
+  });
+  container.innerHTML = html;
+
+  // Edit popup
+  container.querySelectorAll('[data-val-edit]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const key = btn.dataset.valEdit;
+      document.querySelectorAll('.player-edit-popup').forEach(p => p.classList.remove('open'));
+      document.getElementById(`val-popup-${key}`).classList.add('open');
+    });
+  });
+  container.querySelectorAll('.player-edit-popup').forEach(popup => {
+    popup.addEventListener('click', e => e.stopPropagation());
+  });
+  container.querySelectorAll('[data-val-save]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.valSave;
+      const flag = document.getElementById(`val-edit-flag-${key}`).value.trim().toLowerCase();
+      const nick = document.getElementById(`val-edit-nick-${key}`).value.trim();
+      const url  = document.getElementById(`val-edit-url-${key}`).value.trim();
+      const flagImg  = container.querySelector(`[data-val-flag-img="${key}"]`);
+      const nickSpan = container.querySelector(`[data-val-nick-text="${key}"]`);
+      if (flagImg) flagImg.src = `${FLAG}${flag}.svg`;
+      if (nickSpan) nickSpan.textContent = `" ${nick} "`;
+      const idx = parseInt(key.split('-')[0]);
+      DB_VAL.teams[teamKey].players[idx]._override = { flag, nick, url };
+      document.getElementById(`val-popup-${key}`).classList.remove('open');
+    });
+  });
+  container.querySelectorAll('[data-val-cancel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`val-popup-${btn.dataset.valCancel}`).classList.remove('open');
+    });
+  });
+}
+
+document.getElementById('val-team1-select').addEventListener('change', e => valRenderPlayerRows(e.target.value, 'val-team1-players', 'val-team1-label'));
+document.getElementById('val-team2-select').addEventListener('change', e => valRenderPlayerRows(e.target.value, 'val-team2-players', 'val-team2-label'));
+
+// VALORANT: get stats
+function valGetStats(containerId, teamKey) {
+  const container = document.getElementById(containerId);
+  return DB_VAL.teams[teamKey].players.map((p, i) => {
+    const ov = p._override;
+    return {
+      flag:   ov ? ov.flag : p.flag,
+      nick:   ov ? ov.nick : p.nick,
+      url:    ov ? ov.url  : p.url,
+      kda:    container.querySelector(`[data-player="${i}"][data-field="kda"]`)?.value.trim() || '—',
+      acs:    container.querySelector(`[data-player="${i}"][data-field="acs"]`)?.value.trim() || '—',
+      adr:    container.querySelector(`[data-player="${i}"][data-field="adr"]`)?.value.trim() || '—',
+      rating: container.querySelector(`[data-player="${i}"][data-field="rating"]`)?.value.trim() || '—',
+    };
+  }).sort((a, b) => (parseFloat(b.rating) || -999) - (parseFloat(a.rating) || -999));
+}
+
+// VALORANT: parse VLR text
+document.getElementById('val-btn-parse').addEventListener('click', () => {
+  const t1key = document.getElementById('val-team1-select').value;
+  const t2key = document.getElementById('val-team2-select').value;
+  const statusEl = document.getElementById('val-paste-status');
+  const text = document.getElementById('val-paste').value;
+
+  console.log('VAL parse: t1key=', t1key, 't2key=', t2key, 'text length=', text.length);
+
+  if (!t1key || !t2key) {
+    statusEl.textContent = '⚠️ Сначала выбери обе команды';
+    statusEl.className = 'paste-status error';
+    document.getElementById('val-paste').value = `СТОП: команды не выбраны. t1="${t1key}" t2="${t2key}"`;
+    return;
+  }
+
+  // Build nick map
+  const nickMap = {};
+  [t1key, t2key].forEach(tkey => {
+    DB_VAL.teams[tkey].players.forEach((p, i) => {
+      nickMap[p.nick.toLowerCase()] = { tkey, i };
+    });
+  });
+
+  // VLR format (indices without filtering empty lines):
+  // i+0 = [nick](url)
+  // i+1 = [TEAM](url)
+  // i+2 = rating (1.29)
+  // i+3 = acs (240)
+  // i+4 = kda (57/33/8)
+  // i+5 = diff (+24)
+  // i+6 = FKAST (76%)
+  // i+7 = ADR (138)
+
+  const lines = text.split('\n').map(l => l.trim()); // НЕ фильтруем — сохраняем индексы
+  let filled = 0;
+  const debugLines = [`lines.length=${lines.length}`, `first3: ${JSON.stringify(lines.slice(0,3))}`];
+
+  // Extract nick — plain text (markdown ссылки при вставке теряют форматирование)
+  function extractValNick(line) {
+    if (!line) return null;
+    // Если всё же markdown: [nick](url)
+    const md = line.match(/^\[([^\]]+)\]\(/);
+    if (md) return md[1].toLowerCase();
+    // Plain text: просто строка без цифр, слешей, %, +/-
+    if (/^[A-Za-z0-9_\-\.]{2,20}$/.test(line)) return line.toLowerCase();
+    return null;
+  }
+
+  // Team line: короткий апперкейс аббревиатур (PRX, G2, NRG — max 5 символов)
+  function isTeamLine(line) {
+    if (!line) return false;
+    if (/^\[[A-Z0-9]{1,5}\]\(/.test(line)) return true;
+    if (/^[A-Z0-9]{1,5}$/.test(line)) return true;
+    return false;
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const nick = extractValNick(line);
+    if (!nick || isTeamLine(line)) continue;
+
+    // Match to DB
+    let bestDist = Infinity, matchedTkey = null, matchedIdx = null;
+    for (const [dbNick, info] of Object.entries(nickMap)) {
+      const d = levenshtein(nick, dbNick);
+      if (d < bestDist) { bestDist = d; matchedTkey = info.tkey; matchedIdx = info.i; }
+    }
+    if (bestDist > 2) { debugLines.push(`"${nick}" — не найден (dist=${bestDist})`); continue; }
+
+    // Динамически ищем rating (X.XX) после ника — пропускаем агентов, команду и всё остальное
+    let j = i + 1;
+    let ratingJ = -1;
+    while (j < i + 15 && j < lines.length) {
+      if (/^\d\.\d{2}$/.test((lines[j] || '').trim())) { ratingJ = j; break; }
+      j++;
+    }
+    if (ratingJ === -1) { debugLines.push(`"${nick}" — rating не найден`); continue; }
+
+    const rating = lines[ratingJ].trim();       // 1.29
+    const acs    = (lines[ratingJ+1] || '').trim(); // 240
+    const kda    = (lines[ratingJ+2] || '').trim(); // 57/33/8
+    // ratingJ+3 = diff, ratingJ+4 = fkast%, ratingJ+5 = adr
+    const adrVal = (lines[ratingJ+5] || '—').trim();
+
+    if (!/^\d\.\d{2}$/.test(rating)) { debugLines.push(`"${nick}" — rating bad: "${rating}" (j=${j})`); continue; }
+    if (!/^\d+\/\d+\/\d+$/.test(kda)) { debugLines.push(`"${nick}" — kda bad: "${kda}"`); continue; }
+
+    const containerId = matchedTkey === t1key ? 'val-team1-players' : 'val-team2-players';
+    const container = document.getElementById(containerId);
+    if (!container) continue;
+
+    const kdaEl    = container.querySelector(`[data-player="${matchedIdx}"][data-field="kda"]`);
+    const acsEl    = container.querySelector(`[data-player="${matchedIdx}"][data-field="acs"]`);
+    const adrEl    = container.querySelector(`[data-player="${matchedIdx}"][data-field="adr"]`);
+    const ratingEl = container.querySelector(`[data-player="${matchedIdx}"][data-field="rating"]`);
+
+    if (kdaEl)    kdaEl.value    = kda;
+    if (acsEl)    acsEl.value    = acs;
+    if (adrEl)    adrEl.value    = adrVal;
+    if (ratingEl) ratingEl.value = rating;
+    debugLines.push(`"${nick}" ✓ rating=${rating} acs=${acs} kda=${kda} adr=${adrVal}`);
+    filled++;
+  }
+
+  document.getElementById('val-paste').value = debugLines.join('\n') || '(дебаг пуст — ни один ник не найден в тексте)';
+  console.log('VLR debug:', debugLines);
+  statusEl.textContent = filled > 0
+    ? `Заполнено ${filled} из 10 строк — проверь и скорректируй если нужно`
+    : 'Не удалось разобрать данные — проверь формат';
+  statusEl.className = filled > 0 ? 'paste-status done' : 'paste-status error';
+});
+
+// VALORANT: build scoreboard HTML
+function valBuildScoreboard(t1key, t2key, p1, p2) {
+  const t1 = DB_VAL.teams[t1key], t2 = DB_VAL.teams[t2key];
+  const block = (team, players) => `
+    <div class="sb-team-block">
+      <div class="sb-team-header">
+        <a href="${team.url}" class="sb-team-name" target="_blank" rel="noopener">
+          <img src="${team.logo}" class="sb-team-logo" alt="${team.name}">${team.name}
+        </a>
+        <div class="sb-col-label">KDA</div>
+        <div class="sb-col-label">ACS</div>
+        <div class="sb-col-label">ADR</div>
+        <div class="sb-col-label">Rating</div>
+      </div>
+      ${players.map(p => `
+      <div class="sb-player-row">
+        <a href="${p.url}" class="sb-player-nick" target="_blank" rel="noopener">
+          <img src="${FLAG}${p.flag}.svg" class="sb-flag" alt="${p.flag}">
+          ${p.nick}
+        </a>
+        <div class="sb-stat">${p.kda}</div>
+        <div class="sb-stat">${p.acs}</div>
+        <div class="sb-stat">${p.adr}</div>
+        <div class="sb-stat sb-rating">${p.rating}</div>
+      </div>`).join('')}
+    </div>`;
+
+  // Reuse CS2 scoreboard CSS (same class names, same layout)
+  const css = `<style>
+#cs2-scoreboard{font-family:sans-serif;width:100%;max-width:900px}
+#cs2-scoreboard *{box-sizing:border-box;margin:0;padding:0}
+#cs2-scoreboard .sb-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#cs2-scoreboard .sb-team-block{background:#1e1c20;border:1px solid #2a272e;border-radius:8px;overflow:hidden}
+#cs2-scoreboard .sb-team-header{display:grid;grid-template-columns:1fr 80px 60px 60px 70px;align-items:center;padding:8px 12px;border-bottom:1px solid #2a272e;gap:6px}
+#cs2-scoreboard .sb-team-name{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:#fff;text-decoration:none}
+#cs2-scoreboard .sb-team-name:hover{color:#ab84ff}
+#cs2-scoreboard .sb-team-logo{width:20px;height:20px;object-fit:contain}
+#cs2-scoreboard .sb-col-label{font-size:10px;font-weight:700;color:#444450;text-transform:uppercase;text-align:center}
+#cs2-scoreboard .sb-player-row{display:grid;grid-template-columns:1fr 80px 60px 60px 70px;align-items:center;padding:7px 12px;border-bottom:1px solid #1a181d;gap:6px}
+#cs2-scoreboard .sb-player-row:last-child{border-bottom:none}
+#cs2-scoreboard .sb-player-nick{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cs2-scoreboard .sb-player-nick:hover{color:#ab84ff}
+#cs2-scoreboard .sb-flag{width:14px;height:10px;object-fit:cover;border-radius:1px;flex-shrink:0}
+#cs2-scoreboard .sb-stat{font-size:12px;color:#888890;text-align:center}
+#cs2-scoreboard .sb-rating{color:#c5c5c6;font-weight:700}
+@media(max-width:600px){#cs2-scoreboard .sb-wrap{grid-template-columns:1fr}}
+</style>`;
+
+  const body = `<div id="cs2-scoreboard"><div class="sb-wrap">
+${block(t1, p1)}
+${block(t2, p2)}
+</div></div><br>`;
+
+  return { css, body, full: css + '\n' + body };
+}
+
+document.getElementById('val-gen-scoreboard').addEventListener('click', () => {
+  const t1key = document.getElementById('val-team1-select').value;
+  const t2key = document.getElementById('val-team2-select').value;
+  if (!t1key || !t2key) return;
+  const p1 = valGetStats('val-team1-players', t1key);
+  const p2 = valGetStats('val-team2-players', t2key);
+  const { full, body, css } = valBuildScoreboard(t1key, t2key, p1, p2);
+  let s = document.getElementById('val-sb-style');
+  if (!s) { s = document.createElement('style'); s.id = 'val-sb-style'; document.head.appendChild(s); }
+  s.textContent = css.replace(/<\/?style>/g, '');
+  document.getElementById('val-scoreboard-preview').innerHTML = body;
+  document.getElementById('val-scoreboard-code').textContent = full;
+  document.getElementById('val-scoreboard-output').classList.add('visible');
+  document.getElementById('val-copy-scoreboard').style.display = 'inline-block';
+});
+
+document.getElementById('val-copy-scoreboard').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('val-scoreboard-code').textContent);
+  const btn = document.getElementById('val-copy-scoreboard');
+  btn.textContent = 'Скопировано ✓';
+  setTimeout(() => btn.textContent = 'Скопировать', 2000);
+});
+
+// VALORANT: searchable dropdowns
+(function() {
+  const configs = [
+    { displayId: 'val-team1-display', selectId: 'val-team1-select', ddId: 'val-team1-dd' },
+    { displayId: 'val-team2-display', selectId: 'val-team2-select', ddId: 'val-team2-dd' },
+  ];
+  configs.forEach(({ displayId, selectId, ddId }) => {
+    const display = document.getElementById(displayId);
+    const select  = document.getElementById(selectId);
+    const dd      = document.getElementById(ddId);
+    const optWrap = dd.querySelector('.sd-options');
+    const options = [...select.options].filter(o => o.value !== '').map(o => ({
+      value: o.value, label: o.text,
+      ru: (DB_VAL.teams[o.value] && DB_VAL.teams[o.value].ru) ? DB_VAL.teams[o.value].ru : ''
+    }));
+    let savedLabel = '';
+    function matches(o, q) { return o.label.toLowerCase().includes(q) || o.ru.includes(q); }
+    function renderOptions(filter = '') {
+      const q = filter.toLowerCase().trim();
+      const filtered = q ? options.filter(o => matches(o, q)) : options;
+      if (!filtered.length) { optWrap.innerHTML = '<div class="sd-empty">Ничего не найдено</div>'; return; }
+      optWrap.innerHTML = filtered.map(o =>
+        `<div class="sd-option${o.value === select.value ? ' selected' : ''}" data-val="${o.value}">${o.label}</div>`
+      ).join('');
+      optWrap.querySelectorAll('.sd-option').forEach(el => {
+        el.addEventListener('click', () => {
+          select.value = el.dataset.val;
+          select.dispatchEvent(new Event('change'));
+          savedLabel = options.find(o => o.value === el.dataset.val)?.label || '';
+          display.value = savedLabel;
+          dd.classList.remove('open');
+        });
+      });
+    }
+    display.addEventListener('focus', () => { display.value = ''; renderOptions(''); dd.classList.add('open'); });
+    display.addEventListener('input', () => { renderOptions(display.value); dd.classList.add('open'); });
+    display.addEventListener('blur', () => {
+      setTimeout(() => {
+        dd.classList.remove('open');
+        display.value = savedLabel || (select.value ? (options.find(o=>o.value===select.value)?.label||'') : '');
+      }, 200);
+    });
+  });
+})();
 const zone = document.getElementById('upload-zone');
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
