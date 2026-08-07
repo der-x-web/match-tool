@@ -70,12 +70,27 @@ select:focus, input:focus { border-color: #ab84ff; }
 
 /* Maps */
 .map-row { display: grid; grid-template-columns: 110px 1fr 70px 16px 70px 130px; gap: 8px; align-items: center; margin-bottom: 8px; }
-.map-preview { width: 110px; height: 44px; object-fit: cover; object-position: center 40%; border-radius: 6px; display: none; }
+.map-preview { width: 110px; height: 44px; object-fit: cover; object-position: center 70%; border-radius: 6px; display: none; }
 .map-preview.visible { display: block; }
 .map-row-labels { display: grid; grid-template-columns: 110px 1fr 70px 16px 70px 130px; gap: 8px; margin-bottom: 4px; }
 .map-row-labels span { font-size: 10px; color: #444450; text-transform: uppercase; }
 
 .notice { font-size: 12px; color: #ab84ff; background: rgba(171,132,255,0.08); border: 1px solid rgba(171,132,255,0.2); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; }
+
+/* Input mode switcher */
+.mode-switcher { display: flex; gap: 0; margin-bottom: 12px; border: 1px solid #35323a; border-radius: 6px; overflow: hidden; }
+.mode-btn { flex: 1; padding: 7px 12px; background: none; border: none; color: #888890; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.mode-btn.active { background: #2a272e; color: #fff; }
+.mode-btn:hover:not(.active) { background: rgba(171,132,255,0.06); color: #c5c5c6; }
+
+/* Text paste area */
+.paste-area { width: 100%; min-height: 160px; background: #0d0b0f; border: 1px solid #35323a; border-radius: 8px; color: #c5c5c6; font-family: monospace; font-size: 12px; padding: 12px; outline: none; resize: vertical; transition: border-color 0.15s; }
+.paste-area:focus { border-color: #ab84ff; }
+.paste-area::placeholder { color: #444450; }
+.paste-status { font-size: 12px; color: #888890; margin-top: 6px; min-height: 18px; }
+.paste-status.done { color: #44cc44; }
+.paste-status.error { color: #ff4444; }
+.btn-parse { margin-top: 8px; }
 
 /* Searchable dropdown */
 .sd-wrap { position: relative; }
@@ -260,18 +275,34 @@ select:focus, input:focus { border-color: #ab84ff; }
     </div>
 
     <div class="card">
-      <div class="card-title">2. Загрузи скрин — данные заполнятся автоматически</div>
-      <div class="notice">⚡ Сначала выбери команды, потом загружай скрин</div>
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" accept="image/*" id="img-input">
-        <div class="icon">📸</div>
-        <p>Перетащи скрин, <span>нажми для выбора</span> или вставь из буфера <span>Ctrl+V</span></p>
+      <div class="card-title">2. Загрузи данные — заполнятся автоматически</div>
+      <div class="notice">⚡ Сначала выбери команды, потом загружай данные</div>
+
+      <div class="mode-switcher">
+        <button class="mode-btn active" id="mode-img-btn">📸 Скриншот</button>
+        <button class="mode-btn" id="mode-text-btn">📋 Текст с HLTV</button>
       </div>
-      <img id="preview-img" alt="preview">
-      <div class="ocr-status" id="ocr-status"></div>
-      <div style="margin-top:8px">
-        <div style="font-size:10px;color:#444450;margin-bottom:4px;text-transform:uppercase">Сырой текст OCR (для отладки)</div>
-        <div id="ocr-debug" style="background:#0d0b0f;border:1px solid #2a272e;border-radius:6px;padding:8px;font-family:monospace;font-size:10px;color:#666672;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-all"></div>
+
+      <!-- Режим скриншота -->
+      <div id="mode-img">
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" accept="image/*" id="img-input">
+          <div class="icon">📸</div>
+          <p>Перетащи скрин, <span>нажми для выбора</span> или вставь из буфера <span>Ctrl+V</span></p>
+        </div>
+        <img id="preview-img" alt="preview">
+        <div class="ocr-status" id="ocr-status"></div>
+        <div style="margin-top:8px">
+          <div style="font-size:10px;color:#444450;margin-bottom:4px;text-transform:uppercase">Сырой текст OCR (для отладки)</div>
+          <div id="ocr-debug" style="background:#0d0b0f;border:1px solid #2a272e;border-radius:6px;padding:8px;font-family:monospace;font-size:10px;color:#666672;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-all"></div>
+        </div>
+      </div>
+
+      <!-- Режим текста -->
+      <div id="mode-text" style="display:none">
+        <textarea class="paste-area" id="hltv-paste" placeholder="Вставь статистику с HLTV — выдели таблицу обеих команд и скопируй (Ctrl+C), затем вставь сюда (Ctrl+V)&#10;&#10;Пример формата:&#10;Spirit&#10;donk  58-65  +0.91%  81.4  62.7%  1.07&#10;magixx  40-57  -0.53%  62.0  57.8%  0.91&#10;..."></textarea>
+        <div class="paste-status" id="paste-status"></div>
+        <button class="btn btn-primary btn-parse" id="btn-parse-text">Заполнить из текста</button>
       </div>
     </div>
 
@@ -1106,13 +1137,13 @@ const DB = {
     }
   },
   maps: {
-    mirage:  { name: 'Mirage',  img: 'https://esports.ru/wp-content/uploads/2026/07/92368c862e20467798aa82d94697e0b1-768x432.jpg' },
-    inferno: { name: 'Inferno', img: 'https://esports.ru/wp-content/uploads/2026/07/b7443a3adfc48f1602246b3a82f25be3-768x425.jpg' },
-    nuke:    { name: 'Nuke',    img: 'https://esports.ru/wp-content/uploads/2026/07/3662750741_preview_20240328192936_1-768x432.jpg' },
-    ancient: { name: 'Ancient', img: 'https://esports.ru/wp-content/uploads/2026/07/cs2_ancient_a_site-768x432.jpg' },
-    anubis:  { name: 'Anubis',  img: 'https://esports.ru/wp-content/uploads/2026/07/445f8ab0-8013-49a2-9462-7c16f7547f3d-768x403.jpg' },
-    dust2:   { name: 'Dust II', img: 'https://esports.ru/wp-content/uploads/2026/07/78ff9986a89b446fab2b99e0b050def4-768x432.jpg' },
-    cache:   { name: 'Cache',   img: 'https://esports.ru/wp-content/uploads/2026/07/mbwk627-768x381.jpeg' }
+    mirage:  { name: 'Mirage',  img: 'https://esports.ru/wp-content/uploads/2026/08/mirage-768x432.jpg' },
+    inferno: { name: 'Inferno', img: 'https://esports.ru/wp-content/uploads/2026/08/inferno_1-768x432.jpg' },
+    nuke:    { name: 'Nuke',    img: 'https://esports.ru/wp-content/uploads/2026/08/nuke_1-768x432.jpg' },
+    ancient: { name: 'Ancient', img: 'https://esports.ru/wp-content/uploads/2026/08/ancient_1-768x432.jpg' },
+    anubis:  { name: 'Anubis',  img: 'https://esports.ru/wp-content/uploads/2026/08/anubis-1024x576.jpg' },
+    dust2:   { name: 'Dust II', img: 'https://esports.ru/wp-content/uploads/2026/08/dust2_1-768x432.jpg' },
+    cache:   { name: 'Cache',   img: 'https://esports.ru/wp-content/uploads/2026/08/cache_1-768x432.jpg' }
   }
 };
 
@@ -1556,6 +1587,158 @@ function autoFill(text, t1key, t2key) {
   ocrStatus.className = filled > 0 ? 'ocr-status done' : 'ocr-status error';
 }
 
+// MODE SWITCHER
+document.getElementById('mode-img-btn').addEventListener('click', () => {
+  document.getElementById('mode-img').style.display = '';
+  document.getElementById('mode-text').style.display = 'none';
+  document.getElementById('mode-img-btn').classList.add('active');
+  document.getElementById('mode-text-btn').classList.remove('active');
+});
+document.getElementById('mode-text-btn').addEventListener('click', () => {
+  document.getElementById('mode-img').style.display = 'none';
+  document.getElementById('mode-text').style.display = '';
+  document.getElementById('mode-img-btn').classList.remove('active');
+  document.getElementById('mode-text-btn').classList.add('active');
+});
+
+// TEXT PARSER (HLTV format)
+function parseHltvText(text) {
+  const t1key = document.getElementById('team1-select').value;
+  const t2key = document.getElementById('team2-select').value;
+  const statusEl = document.getElementById('paste-status');
+
+  if (!t1key || !t2key) {
+    statusEl.textContent = '⚠️ Сначала выбери обе команды';
+    statusEl.className = 'paste-status error';
+    return;
+  }
+
+  // Build nick map: quoted nick inside name line, e.g. "Danil 'donk' Kryshkovets"
+  const nickMap = {};
+  [t1key, t2key].forEach(tkey => {
+    DB.teams[tkey].players.forEach((p, i) => {
+      nickMap[p.nick.toLowerCase()] = { tkey, i };
+    });
+  });
+
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let filled = 0;
+
+  // HLTV multi-line format per player:
+  //   Country
+  //   Firstname 'Nick' Lastname       ← nick is in quotes
+  //   KD\tSwing\tADR\tKAST\tRating   ← stats line (tab-separated or space)
+  //
+  // Strategy: find name lines with quoted nick, then look ahead for stats line
+
+  const Q = /['\u2018\u2019\u201c\u201d]/;
+
+  // Extract quoted nick from a name line
+  function extractNick(line) {
+    const m = line.match(/['\u2018\u2019\u201c\u201d]([A-Za-z0-9_\-]{2,24})['\u2018\u2019\u201c\u201d]/);
+    return m ? m[1].toLowerCase() : null;
+  }
+
+  // Parse a stats line: KD  Swing  ADR  KAST  Rating
+  // Tokens separated by tabs or multiple spaces
+  function parseStatsLine(line) {
+    // Try tab split, then any whitespace split
+    const splits = [
+      line.split(/\t/).map(t => t.trim()).filter(Boolean),
+      line.split(/\s{2,}/).map(t => t.trim()).filter(Boolean),
+      line.split(/\s+/).map(t => t.trim()).filter(Boolean),
+    ];
+    for (const tokens of splits) {
+      const r = parseTokens(tokens);
+      if (r) return r;
+    }
+    return null;
+  }
+
+  function parseTokens(tokens) {
+    if (tokens.length < 5) return null;
+    // Rating: last token X.XX
+    const rating = tokens[tokens.length - 1];
+    if (!/^\d\.\d{2}$/.test(rating)) return null;
+    // Order: KD  Swing  ADR  KAST  Rating
+    const kastTok  = tokens[tokens.length - 2]; // e.g. 62.7%
+    const adrTok   = tokens[tokens.length - 3]; // e.g. 81.4
+    const swingTok = tokens[tokens.length - 4]; // e.g. +0.91%
+    const kdTok    = tokens[tokens.length - 5]; // e.g. 58-65
+
+    const kdMatch = kdTok && kdTok.match(/^(\d{1,3})-(\d{1,3})$/);
+    if (!kdMatch) return null;
+    const kd = kdTok;
+    const kills = parseInt(kdMatch[1]), deaths = parseInt(kdMatch[2]);
+
+    // ADR: X.X or XX.X or XXX.X
+    const adr = adrTok ? adrTok.replace(',', '.') : null;
+    if (!adr || !/^\d{1,3}\.\d$/.test(adr)) return null;
+
+    // Swing: strip % sign
+    let swing = swingTok ? swingTok.replace('%', '').replace(',', '.') : '';
+    if (swing && !swing.startsWith('+') && !swing.startsWith('-')) {
+      swing = (kills >= deaths ? '+' : '-') + swing;
+    }
+
+    return { kd, swing, adr, rating };
+  }
+
+  const debugLines = [];
+
+  // Walk lines: when we find a nick line, look ahead for stats
+  for (let i = 0; i < lines.length; i++) {
+    const nick = extractNick(lines[i]);
+    if (!nick) continue;
+
+    // Match nick to DB
+    let bestDist = Infinity, matchedTkey = null, matchedIdx = null;
+    for (const [dbNick, info] of Object.entries(nickMap)) {
+      const d = levenshtein(nick, dbNick);
+      if (d < bestDist) { bestDist = d; matchedTkey = info.tkey; matchedIdx = info.i; }
+    }
+    if (bestDist > 2) { debugLines.push(`"${nick}" — не найден`); continue; }
+
+    // Look ahead up to 4 lines for stats, skip team-rating lines like "3.0"
+    let stats = null;
+    for (let j = i + 1; j <= i + 4 && j < lines.length; j++) {
+      const candidate = lines[j].trim();
+      if (!candidate || /^\d\.\d$/.test(candidate)) continue; // skip "3.0"
+      stats = parseStatsLine(candidate);
+      debugLines.push(`"${nick}" → "${candidate}" → ${stats ? 'OK ' + JSON.stringify(stats) : 'null'}`);
+      if (stats) break;
+    }
+    if (!stats) { debugLines.push(`"${nick}" — stats не найдены`); continue; }
+
+    const containerId = matchedTkey === t1key ? 'team1-players' : 'team2-players';
+    const container = document.getElementById(containerId);
+    if (!container) continue;
+
+    const kdEl     = container.querySelector(`[data-player="${matchedIdx}"][data-field="kd"]`);
+    const swEl     = container.querySelector(`[data-player="${matchedIdx}"][data-field="swing"]`);
+    const adrEl    = container.querySelector(`[data-player="${matchedIdx}"][data-field="adr"]`);
+    const ratingEl = container.querySelector(`[data-player="${matchedIdx}"][data-field="rating"]`);
+
+    if (kdEl)     kdEl.value     = stats.kd;
+    if (swEl)     { swEl.value = stats.swing; updateSwingSign(swEl, containerId); }
+    if (adrEl)    adrEl.value    = stats.adr;
+    if (ratingEl) ratingEl.value = stats.rating;
+    filled++;
+  }
+
+  // Show debug in textarea
+  document.getElementById('hltv-paste').value = debugLines.join('\n');
+
+  statusEl.textContent = filled > 0
+    ? `Заполнено ${filled} из 10 строк — проверь и скорректируй если нужно`
+    : 'Не удалось разобрать данные — проверь формат';
+  statusEl.className = filled > 0 ? 'paste-status done' : 'paste-status error';
+}
+
+document.getElementById('btn-parse-text').addEventListener('click', () => {
+  parseHltvText(document.getElementById('hltv-paste').value);
+});
+
 // DRAG & DROP
 const zone = document.getElementById('upload-zone');
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
@@ -1654,7 +1837,7 @@ function buildMaps() {
 #cs2-maps .map-card{background:#1e1c20;border-radius:8px;overflow:hidden;border:1px solid #2a272e}
 #cs2-maps .map-card.map-tbd{opacity:.45}
 #cs2-maps .map-img-wrap{width:100%;height:60px;overflow:hidden}
-#cs2-maps .map-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block}
+#cs2-maps .map-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center 70%;display:block}
 #cs2-maps .map-score-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:7px 10px}
 #cs2-maps .map-team{display:flex;align-items:center;gap:5px;min-width:0;justify-content:center}
 #cs2-maps .map-team:first-child{flex-direction:row}
