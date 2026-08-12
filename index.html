@@ -547,6 +547,14 @@ select:focus, input:focus { border-color: #ab84ff; }
   <!-- VALORANT -->
   <div class="game-section" id="game-val">
 
+  <div class="tabs" id="val-tabs">
+    <button class="tab-btn active" data-val-tab="scoreboard">Скорборд</button>
+    <button class="tab-btn" data-val-tab="maps">Карты</button>
+  </div>
+
+  <!-- VAL SCOREBOARD -->
+  <div class="tab-panel active" id="val-tab-scoreboard">
+
     <div class="card">
       <div class="card-title">1. Выбери команды</div>
       <div class="row-2">
@@ -634,6 +642,92 @@ select:focus, input:focus { border-color: #ab84ff; }
       <div class="card-title" style="margin-bottom:8px;margin-top:16px">HTML</div>
       <div class="output-code" id="val-scoreboard-code"></div>
     </div>
+
+  </div><!-- /val-tab-scoreboard -->
+
+  <!-- VAL MAPS -->
+  <div class="tab-panel" id="val-tab-maps">
+    <div class="card">
+      <div class="card-title">Команды</div>
+      <div class="row-2">
+        <div><label>Команда 1 (слева)</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="val-map-team1-display" placeholder="— выбрать —">
+            <select id="val-map-team1" style="display:none">
+              <option value="">— выбрать —</option>
+              <option value="bblval">BBL Esports</option>
+              <option value="eifval">Eintracht Frankfurt</option>
+              <option value="entval">Enterprise Esports</option>
+              <option value="efval">Eternal Fire</option>
+              <option value="ffeval">Fire Flux Esports</option>
+              <option value="fncval">Fnatic</option>
+              <option value="futval">FUT Esports</option>
+              <option value="g2val">G2 Esports</option>
+              <option value="gmval">Gentle Mates</option>
+              <option value="giantxval">GIANTX</option>
+              <option value="jobval">Joblife</option>
+              <option value="kcval">Karmine Corp</option>
+              <option value="navival">Natus Vincere</option>
+              <option value="prx">Paper Rex</option>
+              <option value="pcificval">PCIFIC Esports</option>
+              <option value="thval">Team Heretics</option>
+              <option value="tlval">Team Liquid</option>
+              <option value="tvval">Team Vitality</option>
+            </select>
+            <div class="sd-dropdown" id="val-map-team1-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+        <div><label>Команда 2 (справа)</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="val-map-team2-display" placeholder="— выбрать —">
+            <select id="val-map-team2" style="display:none">
+              <option value="">— выбрать —</option>
+              <option value="bblval">BBL Esports</option>
+              <option value="eifval">Eintracht Frankfurt</option>
+              <option value="entval">Enterprise Esports</option>
+              <option value="efval">Eternal Fire</option>
+              <option value="ffeval">Fire Flux Esports</option>
+              <option value="fncval">Fnatic</option>
+              <option value="futval">FUT Esports</option>
+              <option value="g2val">G2 Esports</option>
+              <option value="gmval">Gentle Mates</option>
+              <option value="giantxval">GIANTX</option>
+              <option value="jobval">Joblife</option>
+              <option value="kcval">Karmine Corp</option>
+              <option value="navival">Natus Vincere</option>
+              <option value="prx">Paper Rex</option>
+              <option value="pcificval">PCIFIC Esports</option>
+              <option value="thval">Team Heretics</option>
+              <option value="tlval">Team Liquid</option>
+              <option value="tvval">Team Vitality</option>
+            </select>
+            <div class="sd-dropdown" id="val-map-team2-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Карты</div>
+      <div class="map-row-labels">
+        <span>Превью</span><span>Карта</span><span>Счёт 1</span><span></span><span>Счёт 2</span><span>Пик</span>
+      </div>
+      <div id="val-maps-rows"></div>
+      <button class="btn btn-secondary" id="val-add-map" style="margin-top:8px;font-size:12px;padding:6px 14px">+ Добавить карту</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="val-gen-maps">Сгенерировать HTML</button>
+      <button class="btn btn-copy" id="val-copy-maps" style="display:none">Скопировать</button>
+    </div>
+
+    <div class="output-wrap" id="val-maps-output">
+      <div class="card-title" style="margin-bottom:8px">Превью</div>
+      <div class="output-preview" id="val-maps-preview"></div>
+      <div class="card-title" style="margin-bottom:8px;margin-top:16px">HTML</div>
+      <div class="output-code" id="val-maps-code"></div>
+    </div>
+  </div><!-- /val-tab-maps -->
 
   </div><!-- /game-val -->
 
@@ -1307,10 +1401,10 @@ const DB = {
 const FLAG = 'https://esports.ru/wp-content/uploads/2025/11/';
 
 // TABS
-document.querySelectorAll('.tab-btn').forEach(btn => {
+document.querySelectorAll('#game-cs2 .tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#game-cs2 .tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#game-cs2 .tab-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
   });
@@ -2189,6 +2283,21 @@ const DB_VAL = {
         { nick: 'Fizzy',        flag: 'pt', url: 'https://esports.ru/valorant/players/fizzy-david-figueiredo-valorant/' },
       ]
     },
+  },
+  maps: {
+    fracture: { name: 'Fracture', img: 'https://esports.ru/wp-content/uploads/2025/05/image-47-22.jpg' },
+    ascent:   { name: 'Ascent',   img: 'https://esports.ru/wp-content/uploads/2026/06/image-269.jpg' },
+    bind:     { name: 'Bind',     img: 'https://esports.ru/wp-content/uploads/2025/02/izobrazhenie_2025-02-15_154202408.jpg' },
+    haven:    { name: 'Haven',    img: 'https://esports.ru/wp-content/uploads/2025/02/izobrazhenie_2025-02-15_153736752.jpg' },
+    split:    { name: 'Split',    img: 'https://esports.ru/wp-content/uploads/2025/02/izobrazhenie_2025-02-15_153833953.jpg' },
+    icebox:   { name: 'Icebox',   img: 'https://esports.ru/wp-content/uploads/2025/08/izobrazhenie_2025-08-24_192705467.png' },
+    breeze:   { name: 'Breeze',   img: 'https://esports.ru/wp-content/uploads/2025/03/izobrazhenie_2025-03-18_195245244.jpg' },
+    lotus:    { name: 'Lotus',    img: 'https://esports.ru/wp-content/uploads/2025/02/izobrazhenie_2025-02-15_154015027.jpg' },
+    pearl:    { name: 'Pearl',    img: 'https://esports.ru/wp-content/uploads/2025/02/izobrazhenie_2025-02-15_153921186.jpg' },
+    sunset:   { name: 'Sunset',   img: 'https://esports.ru/wp-content/uploads/2024/11/loading_screen_sunset.jpg' },
+    abyss:    { name: 'Abyss',    img: 'https://esports.ru/wp-content/uploads/2024/07/thoughts-on-abyss-v0-nlvo04ijyh6d1.jpg' },
+    corrode:  { name: 'Corrode',  img: 'https://esports.ru/wp-content/uploads/2025/08/izobrazhenie_2025-08-24_191848335.jpg' },
+    summit:   { name: 'Summit',   img: 'https://esports.ru/wp-content/uploads/2025/05/izobrazhenie_2026-08-12_184023509.jpg' },
   }
 };
 
@@ -2473,11 +2582,134 @@ document.getElementById('val-copy-scoreboard').addEventListener('click', () => {
   setTimeout(() => btn.textContent = 'Скопировать', 2000);
 });
 
+// VALORANT: tabs
+document.querySelectorAll('#val-tabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#val-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#game-val .tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('val-tab-' + btn.dataset.valTab).classList.add('active');
+  });
+});
+
+// VALORANT: maps logic
+var valMapCount = 0;
+function valAddMapRow() {
+  valMapCount++;
+  var id = valMapCount;
+  var div = document.createElement('div');
+  div.className = 'map-row';
+  div.id = 'val-map-row-' + id;
+  div.innerHTML =
+    '<img class="map-preview" id="val-mprev-' + id + '" alt="">' +
+    '<select id="val-msel-' + id + '">' +
+    '<option value="">— карта —</option>' +
+    Object.entries(DB_VAL.maps).map(function(e) { return '<option value="' + e[0] + '">' + e[1].name + '</option>'; }).join('') +
+    '</select>' +
+    '<input type="text" placeholder="13" id="val-ms1-' + id + '">' +
+    '<span style="text-align:center;color:#555560;font-size:16px;line-height:34px">:</span>' +
+    '<input type="text" placeholder="10" id="val-ms2-' + id + '">' +
+    '<select id="val-mpick-' + id + '">' +
+    '<option value="">— пик —</option>' +
+    '<option value="t1">Пик команды 1</option>' +
+    '<option value="t2">Пик команды 2</option>' +
+    '</select>';
+  document.getElementById('val-maps-rows').appendChild(div);
+  document.getElementById('val-msel-' + id).addEventListener('change', function(e) {
+    var prev = document.getElementById('val-mprev-' + id);
+    if (e.target.value && DB_VAL.maps[e.target.value]) { prev.src = DB_VAL.maps[e.target.value].img; prev.classList.add('visible'); }
+    else prev.classList.remove('visible');
+  });
+}
+document.getElementById('val-add-map').addEventListener('click', valAddMapRow);
+valAddMapRow(); valAddMapRow(); valAddMapRow();
+
+function valBuildMaps() {
+  var t1key = document.getElementById('val-map-team1').value;
+  var t2key = document.getElementById('val-map-team2').value;
+  var t1 = DB_VAL.teams[t1key], t2 = DB_VAL.teams[t2key];
+  var maps = [];
+  for (var i = 1; i <= valMapCount; i++) {
+    var sel = document.getElementById('val-msel-' + i);
+    if (!sel || !sel.value) continue;
+    var s1 = (document.getElementById('val-ms1-' + i) && document.getElementById('val-ms1-' + i).value.trim()) || '';
+    var s2 = (document.getElementById('val-ms2-' + i) && document.getElementById('val-ms2-' + i).value.trim()) || '';
+    var mapData = Object.assign({}, DB_VAL.maps[sel.value]);
+    mapData.s1 = s1; mapData.s2 = s2; mapData.played = !!(s1 && s2);
+    maps.push(mapData);
+  }
+  if (!maps.length) { alert('Добавь хотя бы одну карту'); return null; }
+
+  var tLogo = function(t) { return t ? '<img src="' + t.logo + '" class="map-team-logo" alt="' + t.name + '">' : ''; };
+  var tName = function(t) { return t ? '<span class="map-team-name">' + (t.shortName || t.name) + '</span>' : ''; };
+
+  var cards = maps.map(function(m) {
+    var n1 = parseInt(m.s1), n2 = parseInt(m.s2);
+    var score = m.played
+      ? '<span class="' + (n1>n2?'s-win':'s-lose') + '">' + m.s1 + '</span><span class="s-sep">:</span><span class="' + (n2>n1?'s-win':'s-lose') + '">' + m.s2 + '</span>'
+      : '<span class="s-tbd">— : —</span>';
+    return '<div class="map-card' + (!m.played?' map-tbd':'') + '">\n' +
+      '  <div class="map-img-wrap"><img src="' + m.img + '" alt="' + m.name + '"></div>\n' +
+      '  <div class="map-score-row">\n' +
+      '    <div class="map-team">' + tLogo(t1) + tName(t1) + '</div>\n' +
+      '    <div class="map-score">' + score + '</div>\n' +
+      '    <div class="map-team">' + tName(t2) + tLogo(t2) + '</div>\n' +
+      '  </div>\n' +
+      '</div>';
+  }).join('\n');
+
+  var css = '<style>\n' +
+    '#cs2-maps{font-family:sans-serif;width:100%;max-width:900px}\n' +
+    '#cs2-maps *{box-sizing:border-box;margin:0;padding:0}\n' +
+    '#cs2-maps .maps-grid{display:grid;grid-template-columns:repeat(' + maps.length + ',1fr);gap:10px}\n' +
+    '#cs2-maps .map-card{background:#1e1c20;border-radius:8px;overflow:hidden;border:1px solid #2a272e}\n' +
+    '#cs2-maps .map-card.map-tbd{opacity:.45}\n' +
+    '#cs2-maps .map-img-wrap{width:100%;height:60px;overflow:hidden}\n' +
+    '#cs2-maps .map-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center 70%;display:block}\n' +
+    '#cs2-maps .map-score-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:7px 10px}\n' +
+    '#cs2-maps .map-team{display:flex;align-items:center;gap:5px;min-width:0;justify-content:center}\n' +
+    '#cs2-maps .map-team:first-child{flex-direction:row}\n' +
+    '#cs2-maps .map-team:last-child{flex-direction:row-reverse}\n' +
+    '#cs2-maps .map-team-logo{width:18px;height:18px;object-fit:contain;flex-shrink:0}\n' +
+    '#cs2-maps .map-team-name{font-size:11px;font-weight:700;color:#888890;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n' +
+    '#cs2-maps .map-score{display:flex;align-items:center;justify-content:center;gap:4px;font-size:15px;font-weight:800;padding:0 6px}\n' +
+    '#cs2-maps .s-win{color:#c5c5c6}\n' +
+    '#cs2-maps .s-lose{color:#555560}\n' +
+    '#cs2-maps .s-sep{color:#444450;font-size:13px;font-weight:600}\n' +
+    '#cs2-maps .s-tbd{color:#444450;font-size:12px;font-weight:600}\n' +
+    '@media(max-width:500px){#cs2-maps .maps-grid{grid-template-columns:1fr}}\n' +
+    '<' + '/style>';
+
+  var body = '<div id="cs2-maps"><div class="maps-grid">\n' + cards + '\n</div></div><br>';
+  return { css: css, body: body, full: css + '\n' + body };
+}
+
+document.getElementById('val-gen-maps').addEventListener('click', function() {
+  var result = valBuildMaps();
+  if (!result) return;
+  var s = document.getElementById('val-maps-style');
+  if (!s) { s = document.createElement('style'); s.id = 'val-maps-style'; document.head.appendChild(s); }
+  s.textContent = result.css.replace(/<\/?style>/g, '');
+  document.getElementById('val-maps-preview').innerHTML = result.body;
+  document.getElementById('val-maps-code').textContent = result.full;
+  document.getElementById('val-maps-output').classList.add('visible');
+  document.getElementById('val-copy-maps').style.display = 'inline-block';
+});
+
+document.getElementById('val-copy-maps').addEventListener('click', function() {
+  navigator.clipboard.writeText(document.getElementById('val-maps-code').textContent);
+  var btn = document.getElementById('val-copy-maps');
+  btn.textContent = 'Скопировано ✓';
+  setTimeout(function() { btn.textContent = 'Скопировать'; }, 2000);
+});
+
 // VALORANT: searchable dropdowns
 (function() {
   const configs = [
     { displayId: 'val-team1-display', selectId: 'val-team1-select', ddId: 'val-team1-dd' },
     { displayId: 'val-team2-display', selectId: 'val-team2-select', ddId: 'val-team2-dd' },
+    { displayId: 'val-map-team1-display', selectId: 'val-map-team1', ddId: 'val-map-team1-dd' },
+    { displayId: 'val-map-team2-display', selectId: 'val-map-team2', ddId: 'val-map-team2-dd' },
   ];
   configs.forEach(({ displayId, selectId, ddId }) => {
     const display = document.getElementById(displayId);
