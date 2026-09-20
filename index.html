@@ -2814,8 +2814,11 @@ function valBuildMaps() {
   }
   if (!maps.length) { alert('Добавь хотя бы одну карту'); return null; }
 
+  // больше трёх карт — названия не влезают, оставляем только логотипы
+  var showNames = maps.length <= 3;
+
   var tLogo = function(t) { return t ? '<img src="' + t.logo + '" class="map-team-logo" alt="' + t.name + '">' : ''; };
-  var tName = function(t) { return t ? '<span class="map-team-name">' + (t.shortName || t.name) + '</span>' : ''; };
+  var tName = function(t) { return (t && showNames) ? '<span class="map-team-name">' + (t.shortName || t.name) + '</span>' : ''; };
 
   var cards = maps.map(function(m) {
     var n1 = parseInt(m.s1), n2 = parseInt(m.s2);
@@ -2995,8 +2998,11 @@ function buildMaps() {
     maps.push({ ...DB.maps[sel.value], s1, s2, played: !!(s1 && s2) });
   }
 
+  // больше трёх карт — названия не влезают, оставляем только логотипы
+  const showNames = maps.length <= 3;
+
   const tLogo = t => t ? `<img src="${t.logo}" class="map-team-logo" alt="${t.name}">` : '';
-  const tName = t => t ? `<span class="map-team-name">${t.shortName || t.name}</span>` : '';
+  const tName = t => (t && showNames) ? `<span class="map-team-name">${t.shortName || t.name}</span>` : '';
 
   const cards = maps.map(m => {
     const n1 = parseInt(m.s1), n2 = parseInt(m.s2);
