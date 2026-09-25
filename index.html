@@ -135,6 +135,18 @@ select:focus, input:focus { border-color: #ab84ff; }
   .map-row, .map-row-labels { grid-template-columns: 1fr 60px 14px 60px; }
   .map-preview { display: none !important; }
 }
+/* ===== DOTA 2: additions (при слиянии перенести в общий <style>) ===== */
+.game-btn[data-game="dota"].active .game-dot { background: #e2412b; }
+#game-dota .player-row, #game-dota .player-row-label { grid-template-columns: 1fr 88px 60px 60px 74px; }
+#game-dota .map-row, #game-dota .map-row-labels { grid-template-columns: 110px 1fr 64px 14px 64px 1.2fr; }
+.dota-paste-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.dota-paste-grid .paste-area { min-height: 150px; font-size: 11px; }
+.paste-status { white-space: pre-line; }
+.paste-status.warn { color: #f0a500; }
+.dota-permap { font-size: 10px; color: #555560; margin: -2px 0 8px 2px; }
+.dota-permap:empty { display: none; }
+#game-dota .map-preview { display: block; visibility: hidden; }
+#game-dota .map-preview.visible { visibility: visible; }
 </style>
 </head>
 <body>
@@ -144,6 +156,7 @@ select:focus, input:focus { border-color: #ab84ff; }
   <div class="game-switcher">
     <button class="game-btn active" data-game="cs2"><span class="game-dot"></span>CS2</button>
     <button class="game-btn" data-game="val"><span class="game-dot"></span>VALORANT</button>
+    <button class="game-btn" data-game="dota"><span class="game-dot"></span>DOTA 2</button>
   </div>
 
   <!-- CS2 -->
@@ -774,6 +787,119 @@ select:focus, input:focus { border-color: #ab84ff; }
   </div><!-- /val-tab-maps -->
 
   </div><!-- /game-val -->
+
+  <!-- ===== DOTA 2: SECTION START ===== -->
+  <div class="game-section" id="game-dota">
+
+  <div class="tabs" id="dota-tabs">
+    <button class="tab-btn active" data-dota-tab="scoreboard">Скорборд</button>
+    <button class="tab-btn" data-dota-tab="maps">Карты</button>
+  </div>
+
+  <!-- DOTA SCOREBOARD -->
+  <div class="tab-panel active" id="dota-tab-scoreboard">
+
+    <div class="card">
+      <div class="card-title">1. Выбери команды</div>
+      <div class="row-2">
+        <div><label>Команда 1</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="dota-team1-display" placeholder="— выбрать —">
+            <select id="dota-team1-select" style="display:none"></select>
+            <div class="sd-dropdown" id="dota-team1-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+        <div><label>Команда 2</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="dota-team2-display" placeholder="— выбрать —">
+            <select id="dota-team2-select" style="display:none"></select>
+            <div class="sd-dropdown" id="dota-team2-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. Вставь статистику с DLTV — по одной карте в каждое окно</div>
+      <div class="notice">⚡ Сначала выбери команды. В каждое окно — обе таблицы карты (Силы света и Силы тьмы). Карта 3 — только если была.</div>
+      <div class="dota-paste-grid" id="dota-paste-grid"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="dota-btn-parse">Заполнить из текста</button>
+        <button class="btn btn-secondary" id="dota-add-paste" style="font-size:12px;padding:6px 14px">+ Добавить карту</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3. Проверь и скорректируй данные</div>
+      <div class="notice">KDA и урон — сумма по картам, GPM и XPM — среднее по сыгранным картам. Значения по каждой карте — мелким шрифтом под игроком.</div>
+      <div class="teams-grid">
+        <div><div class="card-title" id="dota-team1-label" style="margin-bottom:8px">Команда 1</div><div id="dota-team1-players"></div></div>
+        <div><div class="card-title" id="dota-team2-label" style="margin-bottom:8px">Команда 2</div><div id="dota-team2-players"></div></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="dota-gen-scoreboard">Сгенерировать HTML</button>
+      <button class="btn btn-copy" id="dota-copy-scoreboard" style="display:none">Скопировать</button>
+    </div>
+
+    <div class="output-wrap" id="dota-scoreboard-output">
+      <div class="card-title" style="margin-bottom:8px">Превью</div>
+      <div class="output-preview" id="dota-scoreboard-preview"></div>
+      <div class="card-title" style="margin-bottom:8px;margin-top:16px">HTML</div>
+      <div class="output-code" id="dota-scoreboard-code"></div>
+    </div>
+
+  </div><!-- /dota-tab-scoreboard -->
+
+  <!-- DOTA MAPS -->
+  <div class="tab-panel" id="dota-tab-maps">
+    <div class="card">
+      <div class="card-title">Команды</div>
+      <div class="row-2">
+        <div><label>Команда 1 (слева)</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="dota-map-team1-display" placeholder="— выбрать —">
+            <select id="dota-map-team1" style="display:none"></select>
+            <div class="sd-dropdown" id="dota-map-team1-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+        <div><label>Команда 2 (справа)</label>
+          <div class="sd-wrap">
+            <input class="sd-input" id="dota-map-team2-display" placeholder="— выбрать —">
+            <select id="dota-map-team2" style="display:none"></select>
+            <div class="sd-dropdown" id="dota-map-team2-dd"><div class="sd-options"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Карты</div>
+      <div class="notice">Пустые строки пропускаются (если 3-й карты не было — просто оставь её пустой). Счёт — убийства команд; победителя отмечаем отдельно, галочка ставится ему.</div>
+      <div class="map-row-labels">
+        <span>Превью</span><span>Сторона победителя</span><span>Счёт 1</span><span></span><span>Счёт 2</span><span>Победитель</span>
+      </div>
+      <div id="dota-maps-rows"></div>
+      <button class="btn btn-secondary" id="dota-add-map" style="margin-top:8px;font-size:12px;padding:6px 14px">+ Добавить карту</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="dota-gen-maps">Сгенерировать HTML</button>
+      <button class="btn btn-copy" id="dota-copy-maps" style="display:none">Скопировать</button>
+    </div>
+
+    <div class="output-wrap" id="dota-maps-output">
+      <div class="notice" id="dota-maps-warn" style="display:none;color:#f0a500;background:rgba(240,165,0,0.08);border-color:rgba(240,165,0,0.25)">⚠️ Картинки сторон вшиты в код как base64 (тяжёлый код, на сайте может ломаться). Загрузи их на esports.ru и впиши ссылки в DOTA_IMG в начале скрипта.</div>
+      <div class="card-title" style="margin-bottom:8px">Превью</div>
+      <div class="output-preview" id="dota-maps-preview"></div>
+      <div class="card-title" style="margin-bottom:8px;margin-top:16px">HTML</div>
+      <div class="output-code" id="dota-maps-code"></div>
+    </div>
+  </div><!-- /dota-tab-maps -->
+
+  </div><!-- /game-dota -->
+  <!-- ===== DOTA 2: SECTION END ===== -->
 
 </div>
 
@@ -3139,6 +3265,777 @@ document.getElementById('copy-maps').addEventListener('click', () => {
     });
   });
 })();
+</script>
+
+<script>
+(function () {
+'use strict';
+
+/* =====================================================================
+   DOTA 2 — всё внутри IIFE, наружу ничего не торчит (нет конфликтов с CS2/VAL)
+   ===================================================================== */
+
+var DOTA_FLAG = 'https://esports.ru/wp-content/uploads/2025/11/';
+
+// Картинки сторон (загружены на esports.ru, размер 768x384)
+var DOTA_IMG = {
+  light: { url: 'https://esports.ru/wp-content/uploads/2026/09/sily-sveta-768x384.jpg', data: '' },
+  dark:  { url: 'https://esports.ru/wp-content/uploads/2026/09/sily-tmy-768x384.jpg', data: '' }
+};
+var DOTA_SIDES = {
+  light: { name: 'Силы света', img: DOTA_IMG.light.url || DOTA_IMG.light.data },
+  dark:  { name: 'Силы тьмы',  img: DOTA_IMG.dark.url  || DOTA_IMG.dark.data }
+};
+
+// ---------------------------------------------------------------------
+// БАЗА ДАННЫХ
+// alt — другие варианты названия (как пишет DLTV), нужны только для авто-определения команды
+// ---------------------------------------------------------------------
+var DB_DOTA = {
+  teams: {
+    onewin: {
+      name: '1w Team', shortName: '1W', ru: '1win ван вин ванвин', alt: ['1win Team', '1win'],
+      logo: 'https://api.esports.ru/static/300x300/team/134536-1win-dota-2.png',
+      url: 'https://esports.ru/teams/1win-dota2/',
+      players: [
+        { nick: 'Shad',     first: 'Инджи',    last: 'Люб',      flag: 'nl', url: 'https://esports.ru/players/shad-dota2/' },
+        { nick: 'bzm',      first: 'Божидар',  last: 'Богданов', flag: 'bg', url: 'https://esports.ru/players/hansha-dota2/' },
+        { nick: '33',       first: 'Нета',     last: 'Шапира',   flag: 'il', url: 'https://esports.ru/players/33dsfgsfg-dota2/' },
+        { nick: 'Ari',      first: 'Мэтью',    last: 'Уокер',    flag: 'gb', url: 'https://esports.ru/players/moon-shard-enjoyer-dota2/' },
+        { nick: 'Whitemon', first: 'Мэтью',    last: 'Филмон',   flag: 'id', url: 'https://esports.ru/players/the-next-level-play-dota2/' },
+      ]
+    },
+    aurora: {
+      name: 'Aurora Gaming', shortName: 'Aurora', ru: 'аврора',
+      logo: 'https://api.esports.ru/static/300x300/team/133882-aurora-dota-2.png',
+      url: 'https://esports.ru/teams/aurora-dota2/',
+      players: [
+        { nick: 'skiter',  first: 'Оливер',   last: 'Лепко',   flag: 'sk', url: 'https://esports.ru/players/c64-oliver-dota2/' },
+        { nick: 'Stojkov', first: 'Игорь',    last: 'Стойков', flag: 'mk', url: '' },
+        { nick: 'Ws',      first: 'Чунг',     last: 'Вей Шен', flag: 'my', url: 'https://esports.ru/players/shen-dota2/' },
+        { nick: 'Mira',    first: 'Мирослав', last: 'Колпаков', flag: 'ua', url: 'https://esports.ru/players/miroslaw-dota2/' },
+        { nick: 'kaori',   first: 'Олег',     last: 'Медведок', flag: 'ua', url: 'https://esports.ru/players/kaori-6cb960d3-cb9e-4f80-a2f0-dd4459b27243-dota2/' },
+      ]
+    },
+    conventus: {
+      name: 'Conventus Stellarum', shortName: 'Conventus', ru: 'конвентус стеллярум стелларум',
+      logo: 'https://esports.ru/wp-content/uploads/2024/03/icons8-dota-2-480-e1710516040889-64x64.png',
+      url: 'https://esports.ru/dota-2/teams/conventus-stellarum-dota2/',
+      players: [
+        { nick: 'Ghost',   first: 'Даниэл',   last: 'Чан',        flag: 'my', url: 'https://esports.ru/players/ghost-daniel-chan-dota2/' },
+        { nick: 'lorenof', first: 'Артем',    last: 'Мельник',    flag: 'ua', url: 'https://esports.ru/players/lorenof-dota2/' },
+        { nick: 'DM',      first: 'Дмитрий',  last: 'Дорохин',    flag: 'ru', url: 'https://esports.ru/dota-2/players/maybe-once-dota2/' },
+        { nick: 'OmaR',    first: 'Омар',     last: 'Муграби',    flag: 'lb', url: 'https://esports.ru/players/omar-dota2/' },
+        { nick: 'Panto',   first: 'Никита',   last: 'Балаганин',  flag: 'by', url: 'https://esports.ru/dota-2/players/pantomem-dota2/' },
+      ]
+    },
+    gamerlegion: {
+      name: 'GamerLegion', shortName: 'GL', ru: 'геймерлегион гамерлегион',
+      logo: 'https://esports.ru/wp-content/uploads/2026/04/image-5.png',
+      url: 'https://esports.ru/teams/gamerlegion-dota-2-dota2/',
+      players: [
+        { nick: 'Timado', first: 'Энцо',     last: "Джаноли О'Коннор", flag: 'pe', url: 'https://esports.ru/dota-2/players/timado-dota2/' },
+        { nick: 'RCY',    first: 'Френсис',  last: 'Фандемера',        flag: 'us', url: 'https://esports.ru/players/rcy-dota2/' },
+        { nick: 'Fayde',  first: 'Виктор',   last: 'Зуев',             flag: 'us', url: 'https://esports.ru/players/perupirat-dota2/' },
+        { nick: 'Bignum', first: 'Даниил',   last: 'Шеховцов',         flag: 'ua', url: 'https://esports.ru/players/bignum-dota2/' },
+        { nick: 'Speeed', first: 'Пол',      last: 'Боккиккио',        flag: 'us', url: 'https://esports.ru/players/paul-dota2/' },
+      ]
+    },
+    hokori: {
+      name: 'Hokori', shortName: 'Hokori', ru: 'хокори',
+      logo: 'https://api.esports.ru/static/300x300/team/127965-hokori.png',
+      url: 'https://esports.ru/dota-2/teams/hokori-dota2/',
+      players: [
+        { nick: 'payk',      first: 'Йереми',          last: 'Арройо',        flag: 'pe', url: 'https://esports.ru/players/payk-dota2/' },
+        { nick: 'Wonderk1d', first: 'Алдаир Монтойя',  last: 'де ла Крус',    flag: 'pe', url: '' },
+        { nick: 'Vitaly',    first: 'Пабло Сезар',     last: 'Ангуло Роман',  flag: 'pe', url: '' },
+        { nick: 'Asao',      first: 'Эрнан Луис',      last: 'Мамани Лопес',  flag: 'pe', url: '' },
+        { nick: 'Gardick',   first: 'Энтони',          last: 'Лопез',         flag: 'pe', url: '' },
+      ]
+    },
+    lgd: {
+      name: 'LGD Gaming', shortName: 'LGD', ru: 'лгд эл джи ди',
+      logo: 'https://api.esports.ru/static/300x300/team/1657-lgd-gaming-dota-2.png',
+      url: 'https://esports.ru/dota-2/teams/lgd-gaming-dota2/',
+      players: [
+        { nick: 'Wits',      first: 'Максимо',    last: 'Орозко Альса', flag: 'pe', url: 'https://esports.ru/players/zolver-my-clown-dota2/' },
+        { nick: 'SumaiL',    first: 'Сайед',      last: 'Хассан',       flag: 'pk', url: 'https://esports.ru/dota-2/players/sumail-dota2/' },
+        { nick: 'Davai',     first: 'Седрик',     last: 'Декмин',       flag: 'be', url: 'https://esports.ru/news/davai-lama-vernulsya-v-heroic/' },
+        { nick: 'Thiolicor', first: 'Тиаго',      last: 'Колдейро',     flag: 'br', url: 'https://esports.ru/players/thiolicor-dota2/' },
+        { nick: 'Sneyking',  first: 'Цзинцзюнь',  last: 'У',            flag: 'us', url: 'https://esports.ru/players/sneyking-dota2/' },
+      ]
+    },
+    mouz: {
+      name: 'MOUZ', shortName: 'MOUZ', ru: 'маус моуз',
+      logo: 'https://api.esports.ru/static/300x300/team/134559-mouz-dota-2.png',
+      url: 'https://esports.ru/dota-2/teams/mouz-dota2/',
+      players: [
+        { nick: '423',       first: 'Билгуун',   last: 'Алтангинж', flag: 'mn', url: 'https://esports.ru/dota-2/players/x123-dota2/' },
+        { nick: 'Supream^',  first: 'Ондрей',    last: 'Старха',    flag: 'cz', url: 'https://esports.ru/players/s-dota2/' },
+        { nick: 'BOOM',      first: 'Мирослав',  last: 'Бичан',     flag: 'cz', url: 'https://esports.ru/dota-2/players/boom-miroslav-bican-dota2/' },
+        { nick: 'xsvampire', first: 'Даниял',    last: 'Алибаев',   flag: 'kz', url: '' },
+        { nick: 'MoOz',      first: 'Хоэль',     last: 'Осамбела',  flag: 'pe', url: 'https://esports.ru/dota-2/players/aaa-dota2/' },
+      ]
+    },
+    navi: {
+      name: 'Natus Vincere', shortName: 'NAVI', ru: 'нави натус винсере',
+      logo: 'https://api.esports.ru/static/300x300/team/1699-natus-vincere.png',
+      url: 'https://esports.ru/teams/navi-dota2/',
+      players: [
+        { nick: 'gotthejuice', first: 'Тарас',      last: 'Линников',   flag: 'ua', url: 'https://esports.ru/players/gotthejuice-dota2/' },
+        { nick: 'Niku',        first: 'Артем',      last: 'Бачкур',     flag: 'ua', url: 'https://esports.ru/players/niku-dota2/' },
+        { nick: 'pma',         first: 'Юрий',       last: 'Проц',       flag: 'ua', url: 'https://esports.ru/players/skywhywalker-dota2/' },
+        { nick: 'daze',        first: 'Тамир',      last: 'Токпанов',   flag: 'kz', url: 'https://esports.ru/players/daze-dota2/' },
+        { nick: 'Riddys',      first: 'Станислав',  last: 'Митрошкин',  flag: 'ua', url: 'https://esports.ru/players/mistakes-fb1eb2bc-67b6-4207-aca5-aef2b688ebf6-dota2/' },
+      ]
+    },
+    pibbles: {
+      name: 'Pibbles Corp', shortName: 'Pibbles', ru: 'пибблс корп',
+      logo: 'https://api.esports.ru/static/300x300/team/139268-pibbles-corp.png',
+      url: 'https://esports.ru/dota-2/teams/pibbles-corp-dota2/',
+      players: [
+        { nick: 'Lumière',   first: 'Эдвард',   last: 'Гильен',     flag: 'pe', url: '' },
+        { nick: 'lalatronii', first: 'Хуан',    last: 'Росалес',    flag: 'pe', url: '' },
+        { nick: 'Ryu',       first: '',         last: '',           flag: 'pe', url: '' },
+        { nick: 'Mjz',       first: 'Ромель',   last: 'Квинтерос',  flag: 'pe', url: '' },
+        { nick: 'Prada',     first: 'Серджио',  last: 'Торибио',    flag: 'pe', url: '' },
+      ]
+    },
+    pipsqueak: {
+      name: 'Pipsqueak+4', shortName: 'Pipsqueak+4', ru: 'пипсквик пипскуик',
+      logo: 'https://api.esports.ru/static/300x300/team/137354-pipsqueak-4.png',
+      url: 'https://esports.ru/dota-2/teams/pipsqueak-4-dota2/',
+      players: [
+        { nick: 'Rincyq', first: 'Денис',       last: 'Богушев',    flag: 'ua', url: 'https://esports.ru/players/rincyq-dota2/' },
+        { nick: 'Copy',   first: 'Филипп',      last: 'Бюхлер',     flag: 'de', url: 'https://esports.ru/players/copy-dota2/' },
+        { nick: 'Malik',  first: 'Абдималик',   last: 'Сайлау',     flag: 'kz', url: 'https://esports.ru/players/malik-dota2/' },
+        { nick: 'Ekki',   first: 'Марцель',     last: 'Холовенко',  flag: 'pl', url: 'https://esports.ru/players/ekken-dota2/' },
+        { nick: 'aik',    first: 'Алим',        last: 'Беспаев',    flag: 'kz', url: 'https://esports.ru/players/aik-dota2/' },
+      ]
+    },
+    playtime: {
+      name: 'PlayTime', shortName: 'PlayTime', ru: 'плейтайм',
+      logo: 'https://api.esports.ru/static/300x300/team/137885-playtime.png',
+      url: 'https://esports.ru/dota-2/teams/playtime-dota2/',
+      players: [
+        { nick: 'Yuma',    first: 'Юма',     last: 'Ланглет',    flag: 'ni', url: 'https://esports.ru/players/yuma-dota2/' },
+        { nick: '4nalog',  first: 'Жоао',    last: 'Джаннини',   flag: 'br', url: 'https://esports.ru/players/4nalog-dota2/' },
+        { nick: 'fcr',     first: 'Густаво', last: 'Рибейро',    flag: 'br', url: '' },
+        { nick: 'Elmisho', first: 'Элстин',  last: 'Верде',      flag: 'pe', url: 'https://esports.ru/players/9c30a8a2-cb8a-46f0-b344-82f69ed69a51-dota2/' },
+        { nick: 'KJ',      first: 'Матеус',  last: 'Диниз',      flag: 'br', url: '' },
+      ]
+    },
+    cobra: {
+      name: 'Team Cobra', shortName: 'Cobra', ru: 'кобра тим',
+      logo: 'https://api.esports.ru/static/300x300/team/137509-team-cobra.png',
+      url: 'https://esports.ru/dota-2/teams/team-cobra-dota2/',
+      players: [
+        { nick: 'Parker',  first: 'Дэвид',  last: 'Ничо Флорес', flag: 'pe', url: 'https://esports.ru/dota-2/players/parker-dota2/' },
+        { nick: 'Lumpy',   first: 'Луис',   last: 'Яусин',       flag: 'pe', url: '' },
+        { nick: 'Frank',   first: 'Франк',  last: 'Ариес',       flag: 'pe', url: 'https://esports.ru/players/solo-03cb3f25-309d-40bb-8d22-3afc482d04e0-dota2/' },
+        { nick: 'Coyotao', first: 'Андре',  last: 'Феррейра',    flag: 'br', url: '' },
+        { nick: 'StingeR', first: 'Стивен', last: 'Варгас',      flag: 'pe', url: 'https://esports.ru/players/stinger-dota2/' },
+      ]
+    },
+    nemesis: {
+      name: 'Team Nemesis', shortName: 'Nemesis', ru: 'немезис тим',
+      logo: 'https://api.esports.ru/static/300x300/team/136650-team-nemesis.png',
+      url: 'https://esports.ru/dota-2/teams/team-nemesis-dota2/',
+      players: [
+        { nick: 'JaCkky',      first: 'Сулия',   last: 'Кхоомфетсавонг', flag: 'la', url: 'https://esports.ru/dota-2/players/jackky-dota2/' },
+        { nick: 'Mo13ei',      first: 'Фабиан',  last: 'Кнер',           flag: 'de', url: 'https://esports.ru/players/mo13ei-dota2/' },
+        { nick: 'SabeRLight-', first: 'Йонас',   last: 'Волек',          flag: 'cz', url: 'https://esports.ru/players/saberlight-dota2/' },
+        { nick: 'Jhocam',      first: 'Три',     last: 'Кункоро',        flag: 'id', url: 'https://esports.ru/dota-2/players/pathetic-dota2/' },
+        { nick: 'NARMAN',      first: 'Равдан',  last: 'Нармандах',      flag: 'mn', url: 'https://esports.ru/dota-2/players/hustla-dota2/' },
+      ]
+    },
+    yandex: {
+      name: 'Team Yandex', shortName: 'Yandex', ru: 'яндекс тим',
+      logo: 'https://api.esports.ru/static/300x300/team/137073-team-yandex.png',
+      url: 'https://esports.ru/teams/team-yandex-dota2/',
+      players: [
+        { nick: 'watson',       first: 'Алимжан', last: 'Исламбеков', flag: 'kz', url: 'https://esports.ru/players/nezuko-dota2/' },
+        { nick: 'Chira JUNIOR', first: 'Илья',    last: 'Хиртсов',    flag: 'ru', url: 'https://esports.ru/players/chira-junior-dota2/' },
+        { nick: 'ATF',          first: 'Аммар',   last: 'Ассаф',      flag: 'jo', url: 'https://esports.ru/dota-2/players/ammar_the_fucker-dota2/' },
+        { nick: 'Saksa',        first: 'Мартин',  last: 'Саздов',     flag: 'mk', url: 'https://esports.ru/players/saksa-dota2/' },
+        { nick: 'Malady',       first: 'Арман',   last: 'Оразбаев',   flag: 'kz', url: 'https://esports.ru/players/0e378d57-903a-4758-a624-de5cfca72d68-dota2/' },
+      ]
+    },
+    xtreme: {
+      name: 'Xtreme Gaming', shortName: 'XG', ru: 'икстрим экстрим иксг',
+      logo: 'https://api.esports.ru/static/300x300/team/128329-xtreme-gaming.png',
+      url: 'https://esports.ru/teams/xtreme-dota2/',
+      players: [
+        { nick: 'Ame',    first: 'Ван',          last: 'Чуньюй',   flag: 'cn', url: 'https://esports.ru/players/ame-dota2/' },
+        { nick: 'Xm',     first: 'Го',           last: 'Хунчэн',   flag: 'cn', url: 'https://esports.ru/players/xm-dota2/' },
+        { nick: 'zeal',   first: 'Николас Лим',  last: 'Энг Хан',  flag: 'cn', url: 'https://esports.ru/dota-2/players/zeal-a6d2b1f1-b384-46d3-9da1-20f92b1c7401-dota2/' },
+        { nick: 'XinQ',   first: 'Чжао',         last: 'Цзысин',   flag: 'cn', url: 'https://esports.ru/dota-2/players/xinq-dota2/' },
+        { nick: 'BoBoKa', first: 'Е',            last: 'Чжибяо',   flag: 'cn', url: 'https://esports.ru/players/boboka-dota2/' },
+      ]
+    },
+    yakult: {
+      name: 'Yakult Brothers', shortName: 'Yakult', ru: 'якульт бразерс',
+      logo: 'https://api.esports.ru/static/300x300/team/135697-yakult-s-brothers.png',
+      url: 'https://esports.ru/dota-2/teams/yakult-s-brothers-dota2/',
+      players: [
+        { nick: 'lou',      first: 'Лу',    last: 'Чжэнь',    flag: 'cn', url: 'https://esports.ru/players/lou-dota2/' },
+        { nick: 'Emo',      first: 'Чжоу',  last: 'И',        flag: 'cn', url: '' },
+        { nick: 'Beyond',   first: 'Сян',   last: 'Чжэнхун',  flag: 'cn', url: 'https://esports.ru/dota-2/players/battle-symphony-dota2/' },
+        { nick: 'kaka',     first: 'Ху',    last: 'Лянчжи',   flag: 'cn', url: 'https://esports.ru/players/kaka-dota2/' },
+        { nick: 'TianMing', first: 'Цзянь', last: 'Ань',      flag: 'cn', url: 'https://esports.ru/players/jiang-an-dota2-2/' },
+      ]
+    },
+  }
+};
+
+// ---------------------------------------------------------------------
+// УТИЛИТЫ
+// ---------------------------------------------------------------------
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+// «Chira JUNIOR» / «CHIRA_JUNIOR» / «chira-junior» → «chirajunior»
+function norm(s) {
+  return String(s == null ? '' : s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+}
+function playerNick(p) { return p._override ? p._override.nick : p.nick; }
+
+// ---------------------------------------------------------------------
+// ВЫБОР КОМАНД: списки генерируются из БД (руками в <select> ничего добавлять не надо)
+// ---------------------------------------------------------------------
+var teamKeys = Object.keys(DB_DOTA.teams).sort(function (a, b) {
+  return DB_DOTA.teams[a].name.localeCompare(DB_DOTA.teams[b].name);
+});
+['dota-team1-select', 'dota-team2-select', 'dota-map-team1', 'dota-map-team2'].forEach(function (id) {
+  $(id).innerHTML = '<option value="">— выбрать —</option>' + teamKeys.map(function (k) {
+    return '<option value="' + k + '">' + esc(DB_DOTA.teams[k].name) + '</option>';
+  }).join('');
+});
+
+// ---------------------------------------------------------------------
+// ТАБЫ
+// ---------------------------------------------------------------------
+document.querySelectorAll('#dota-tabs .tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('#dota-tabs .tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('#game-dota .tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    $('dota-tab-' + btn.dataset.dotaTab).classList.add('active');
+  });
+});
+
+document.addEventListener('click', function () {
+  document.querySelectorAll('#game-dota .player-edit-popup.open').forEach(function (p) { p.classList.remove('open'); });
+});
+
+// ---------------------------------------------------------------------
+// СКОРБОРД: строки игроков
+// ---------------------------------------------------------------------
+function renderPlayerRows(teamKey, containerId, labelId) {
+  var container = $(containerId), label = $(labelId);
+  if (!teamKey || !DB_DOTA.teams[teamKey]) { container.innerHTML = ''; return; }
+  var team = DB_DOTA.teams[teamKey];
+  if (label) label.textContent = team.name;
+
+  var html = '<div class="player-row-label"><span>Игрок</span><span>KDA</span><span>GPM</span><span>XPM</span><span>Урон</span></div>';
+  team.players.forEach(function (p, i) {
+    var ov = p._override;
+    var flag = ov ? ov.flag : p.flag, nick = ov ? ov.nick : p.nick, url = ov ? ov.url : (p.url || '');
+    var key = i + '-' + containerId;
+    html += '<div class="player-row">' +
+      '<div class="player-nick-display" style="position:relative">' +
+        '<img src="' + DOTA_FLAG + esc(flag) + '.svg" alt="' + esc(flag) + '" data-dota-flag-img="' + key + '">' +
+        '<span data-dota-nick-text="' + key + '">" ' + esc(nick) + ' "</span>' +
+        '<button class="edit-player-btn" data-dota-edit="' + key + '" title="Сменить игрока">✎</button>' +
+        '<div class="player-edit-popup" id="dota-popup-' + key + '">' +
+          '<label>Страна (код флага)</label><input type="text" id="dota-edit-flag-' + key + '" value="' + esc(flag) + '">' +
+          '<label>Ник</label><input type="text" id="dota-edit-nick-' + key + '" value="' + esc(nick) + '">' +
+          '<label>Ссылка на игрока</label><input type="text" id="dota-edit-url-' + key + '" value="' + esc(url) + '">' +
+          '<div class="popup-btns">' +
+            '<button class="popup-btn-save" data-dota-save="' + key + '">Сохранить</button>' +
+            '<button class="popup-btn-cancel" data-dota-cancel="' + key + '">Отмена</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<input type="text" placeholder="10/3/20" data-player="' + i + '" data-field="kda">' +
+      '<input type="text" placeholder="600"     data-player="' + i + '" data-field="gpm">' +
+      '<input type="text" placeholder="800"     data-player="' + i + '" data-field="xpm">' +
+      '<input type="text" placeholder="42000"   data-player="' + i + '" data-field="dmg">' +
+    '</div>' +
+    '<div class="dota-permap" data-permap="' + i + '"></div>';
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll('[data-dota-edit]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.querySelectorAll('#game-dota .player-edit-popup').forEach(function (p) { p.classList.remove('open'); });
+      $('dota-popup-' + btn.dataset.dotaEdit).classList.add('open');
+    });
+  });
+  container.querySelectorAll('.player-edit-popup').forEach(function (popup) {
+    popup.addEventListener('click', function (e) { e.stopPropagation(); });
+  });
+  container.querySelectorAll('[data-dota-save]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.dataset.dotaSave;
+      var flag = $('dota-edit-flag-' + key).value.trim().toLowerCase();
+      var nick = $('dota-edit-nick-' + key).value.trim();
+      var url  = $('dota-edit-url-' + key).value.trim();
+      var flagImg  = container.querySelector('[data-dota-flag-img="' + key + '"]');
+      var nickSpan = container.querySelector('[data-dota-nick-text="' + key + '"]');
+      if (flagImg) flagImg.src = DOTA_FLAG + flag + '.svg';
+      if (nickSpan) nickSpan.textContent = '" ' + nick + ' "';
+      var idx = parseInt(key.split('-')[0], 10);
+      DB_DOTA.teams[teamKey].players[idx]._override = { flag: flag, nick: nick, url: url };
+      $('dota-popup-' + key).classList.remove('open');
+    });
+  });
+  container.querySelectorAll('[data-dota-cancel]').forEach(function (btn) {
+    btn.addEventListener('click', function () { $('dota-popup-' + btn.dataset.dotaCancel).classList.remove('open'); });
+  });
+}
+$('dota-team1-select').addEventListener('change', function (e) { renderPlayerRows(e.target.value, 'dota-team1-players', 'dota-team1-label'); });
+$('dota-team2-select').addEventListener('change', function (e) { renderPlayerRows(e.target.value, 'dota-team2-players', 'dota-team2-label'); });
+
+function getStats(containerId, teamKey) {
+  var container = $(containerId);
+  return DB_DOTA.teams[teamKey].players.map(function (p, i) {
+    var ov = p._override;
+    function val(f) {
+      var el = container.querySelector('[data-player="' + i + '"][data-field="' + f + '"]');
+      return (el && el.value.trim()) || '—';
+    }
+    return {
+      flag:  ov ? ov.flag : p.flag,
+      nick:  ov ? ov.nick : p.nick,
+      url:   ov ? ov.url  : p.url,
+      first: ov ? '' : (p.first || ''),
+      last:  ov ? '' : (p.last || ''),
+      kda: val('kda'), gpm: val('gpm'), xpm: val('xpm'), dmg: val('dmg')
+    };
+  });
+}
+
+// ---------------------------------------------------------------------
+// ОКНА ДЛЯ ТЕКСТА ПО КАРТАМ
+// ---------------------------------------------------------------------
+var MAX_PASTE = 5;
+var pasteCount = 0;
+function addPasteWindow() {
+  if (pasteCount >= MAX_PASTE) return;
+  pasteCount++;
+  var n = pasteCount;
+  var div = document.createElement('div');
+  div.innerHTML =
+    '<div class="card-title" style="margin-bottom:8px">Карта ' + n + (n === 3 ? ' (если была)' : '') + '</div>' +
+    '<textarea class="paste-area dota-paste" id="dota-paste-' + n + '" placeholder="Скопируй обе таблицы (Силы света и Силы тьмы) со страницы карты ' + n + ' на DLTV"></textarea>' +
+    '<div class="paste-status" id="dota-paste-status-' + n + '"></div>';
+  $('dota-paste-grid').appendChild(div);
+  if (pasteCount >= MAX_PASTE) $('dota-add-paste').style.display = 'none';
+}
+$('dota-add-paste').addEventListener('click', addPasteWindow);
+addPasteWindow(); addPasteWindow(); addPasteWindow();
+
+// ---------------------------------------------------------------------
+// ПАРСЕР ТЕКСТА DLTV
+//   [Команда Силы света](url) → заголовок таблицы
+//   <уровень> / [ник](url) / K / D / A / [Buffs:] / ОЦ / % / урон / хил / LH / DN / GPM / XPM
+// ---------------------------------------------------------------------
+var RE_KDA  = /^(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)$/;
+var RE_PAIR = /^(\d+)\s*\/\s*(\d+)$/;
+var RE_HEAD = /^(.*?)\s*(Силы света|Силы тьмы)$/i;
+
+function unlink(s) {
+  var m = s.match(/^\[(.*?)\]\(.*\)$/);
+  return (m ? m[1] : s).trim();
+}
+function toInt(s) {
+  var n = parseInt(String(s).replace(/[^\d]/g, ''), 10);
+  return isNaN(n) ? 0 : n;
+}
+
+function parseText(text) {
+  var lines = text.split(/\r?\n/).map(function (s) {
+    return s.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+  }).filter(Boolean);
+  var blocks = [], cur = null, bad = [];
+
+  for (var i = 0; i < lines.length; i++) {
+    var raw = lines[i];
+    var head = unlink(raw).match(RE_HEAD);
+    if (head) {
+      cur = { teamName: head[1].trim(), side: /света/i.test(head[2]) ? 'light' : 'dark', players: [] };
+      blocks.push(cur);
+      continue;
+    }
+    var kda = raw.match(RE_KDA);
+    if (!kda || !cur || i === 0) continue;
+
+    var nick = unlink(lines[i - 1]);
+    // ищем строку с «% участия в убийствах» — от неё считаем остальные колонки
+    var k = -1;
+    for (var j = i + 1; j < Math.min(i + 14, lines.length); j++) {
+      if (RE_KDA.test(lines[j])) break;
+      if (/%$/.test(lines[j])) { k = j; break; }
+    }
+    var gx = (k >= 0 && lines[k + 4]) ? lines[k + 4].match(RE_PAIR) : null;
+    if (!gx) { bad.push(nick); continue; }
+
+    cur.players.push({
+      nick: nick,
+      k: parseInt(kda[1], 10), d: parseInt(kda[2], 10), a: parseInt(kda[3], 10),
+      dmg: toInt(lines[k + 1]),
+      gpm: parseInt(gx[1], 10), xpm: parseInt(gx[2], 10)
+    });
+    i = k + 4;
+  }
+  return { blocks: blocks, bad: bad };
+}
+
+// ---------------------------------------------------------------------
+// КАКАЯ ТАБЛИЦА — КАКАЯ КОМАНДА (по совпадению ников с составами, названия — для ничьей)
+// ---------------------------------------------------------------------
+function matchCount(block, teamKey) {
+  var set = DB_DOTA.teams[teamKey].players.map(function (p) { return norm(playerNick(p)); });
+  return block.players.filter(function (p) { return set.indexOf(norm(p.nick)) >= 0; }).length;
+}
+function nameScore(block, teamKey) {
+  var t = DB_DOTA.teams[teamKey];
+  var names = [t.name, t.shortName].concat(t.alt || []).map(norm);
+  return names.indexOf(norm(block.teamName)) >= 0 ? 1 : 0;
+}
+function assignBlocks(blocks, t1, t2) {
+  var a = matchCount(blocks[0], t1) + matchCount(blocks[1], t2);
+  var b = matchCount(blocks[0], t2) + matchCount(blocks[1], t1);
+  if (a === b) {
+    a += nameScore(blocks[0], t1) + nameScore(blocks[1], t2);
+    b += nameScore(blocks[0], t2) + nameScore(blocks[1], t1);
+  }
+  return a >= b ? [blocks[0], blocks[1]] : [blocks[1], blocks[0]];
+}
+
+function setStatus(n, text, cls) {
+  var el = $('dota-paste-status-' + n);
+  el.textContent = text;
+  el.className = 'paste-status' + (cls ? ' ' + cls : '');
+}
+
+var parsed = [];   // [{ no, t1: block, t2: block }]
+
+$('dota-btn-parse').addEventListener('click', function () {
+  var t1key = $('dota-team1-select').value, t2key = $('dota-team2-select').value;
+  if (!t1key || !t2key) { setStatus(1, '⚠️ Сначала выбери обе команды', 'error'); return; }
+  var t1 = DB_DOTA.teams[t1key], t2 = DB_DOTA.teams[t2key];
+  parsed = [];
+
+  for (var n = 1; n <= pasteCount; n++) {
+    var text = $('dota-paste-' + n).value.trim();
+    if (!text) { setStatus(n, ''); continue; }
+
+    var res = parseText(text);
+    if (res.blocks.length !== 2) {
+      setStatus(n, '⚠️ Найдено таблиц: ' + res.blocks.length + ' (нужно 2 — Силы света и Силы тьмы)', 'error');
+      continue;
+    }
+    var pair = assignBlocks(res.blocks, t1key, t2key);
+    var c1 = matchCount(pair[0], t1key), c2 = matchCount(pair[1], t2key);
+    if (c1 + c2 === 0) {
+      setStatus(n, '⚠️ Ни один ник не совпал с составами выбранных команд', 'error');
+      continue;
+    }
+
+    var warn = [];
+    var known1 = t1.players.map(function (p) { return norm(playerNick(p)); });
+    var known2 = t2.players.map(function (p) { return norm(playerNick(p)); });
+    pair[0].players.forEach(function (p) { if (known1.indexOf(norm(p.nick)) < 0) warn.push(p.nick + ' (' + t1.name + ')'); });
+    pair[1].players.forEach(function (p) { if (known2.indexOf(norm(p.nick)) < 0) warn.push(p.nick + ' (' + t2.name + ')'); });
+    res.bad.forEach(function (nk) { warn.push(nk + ' (не разобрана строка)'); });
+
+    parsed.push({ no: n, t1: pair[0], t2: pair[1] });
+    var msg = '✓ ' + t1.name + ' — ' + DOTA_SIDES[pair[0].side].name + ' · ' + t2.name + ' — ' + DOTA_SIDES[pair[1].side].name;
+    if (warn.length) msg += '\n⚠️ Не найдены в БД: ' + warn.join(', ') + ' — замени через ✎ и вставь текст заново';
+    setStatus(n, msg, warn.length ? 'warn' : 'done');
+  }
+  if (parsed.length) fillFromParsed(t1key, t2key);
+});
+
+// Суммируем по картам: KDA и урон — сумма, GPM/XPM — среднее по сыгранным картам
+function fillFromParsed(t1key, t2key) {
+  [[t1key, 't1', 'dota-team1-players'], [t2key, 't2', 'dota-team2-players']].forEach(function (cfg) {
+    var team = DB_DOTA.teams[cfg[0]], container = $(cfg[2]);
+    team.players.forEach(function (p, i) {
+      var nk = norm(playerNick(p));
+      var sum = { k: 0, d: 0, a: 0, dmg: 0, gpm: 0, xpm: 0, n: 0 }, hints = [];
+      parsed.forEach(function (pm) {
+        var list = pm[cfg[1]].players;
+        for (var q = 0; q < list.length; q++) {
+          if (norm(list[q].nick) !== nk) continue;
+          var s = list[q];
+          sum.k += s.k; sum.d += s.d; sum.a += s.a; sum.dmg += s.dmg; sum.gpm += s.gpm; sum.xpm += s.xpm; sum.n++;
+          hints.push('К' + pm.no + ': ' + s.k + '/' + s.d + '/' + s.a + ' · ' + s.gpm + '/' + s.xpm + ' · ' + s.dmg);
+          break;
+        }
+      });
+      function setVal(f, v) {
+        var el = container.querySelector('[data-player="' + i + '"][data-field="' + f + '"]');
+        if (el) el.value = v;
+      }
+      setVal('kda', sum.n ? sum.k + '/' + sum.d + '/' + sum.a : '');
+      setVal('gpm', sum.n ? Math.round(sum.gpm / sum.n) : '');
+      setVal('xpm', sum.n ? Math.round(sum.xpm / sum.n) : '');
+      setVal('dmg', sum.n ? sum.dmg : '');
+      var hintEl = container.querySelector('[data-permap="' + i + '"]');
+      if (hintEl) hintEl.textContent = sum.n ? hints.join('   |   ') : 'нет данных ни на одной карте';
+    });
+  });
+}
+
+// ---------------------------------------------------------------------
+// СКОРБОРД: генерация HTML
+// ---------------------------------------------------------------------
+function buildScoreboard(t1key, t2key, p1, p2) {
+  var t1 = DB_DOTA.teams[t1key], t2 = DB_DOTA.teams[t2key];
+  function block(team, players) {
+    return '\n    <div class="sb-team-block">\n' +
+      '      <div class="sb-team-header">\n' +
+      '        <a href="' + esc(team.url) + '" class="sb-team-name" target="_blank" rel="noopener">\n' +
+      '          <img src="' + esc(team.logo) + '" class="sb-team-logo" alt="' + esc(team.name) + '">' + esc(team.name) + '\n' +
+      '        </a>\n' +
+      '        <div class="sb-col-label">KDA</div>\n' +
+      '        <div class="sb-col-label">GPM</div>\n' +
+      '        <div class="sb-col-label">XPM</div>\n' +
+      '        <div class="sb-col-label">Урон</div>\n' +
+      '      </div>' +
+      players.map(function (p) {
+        var full = (p.first || p.last) ? (p.first + ' «' + p.nick + '» ' + p.last).trim() : p.nick;
+        var name = p.url
+          ? '<a href="' + esc(p.url) + '" class="sb-player-name" target="_blank" rel="noopener" title="' + esc(full) + '">' + esc(p.nick) + '</a>'
+          : '<span class="sb-player-name" title="' + esc(full) + '">' + esc(p.nick) + '</span>';
+        return '\n      <div class="sb-player-row">\n' +
+          '        <div class="sb-player-cell">\n' +
+          '          <img src="' + DOTA_FLAG + esc(p.flag) + '.svg" class="sb-flag" alt="' + esc(p.flag) + '">\n' +
+          '          ' + name + '\n' +
+          '        </div>\n' +
+          '        <div class="sb-stat">' + esc(p.kda) + '</div>\n' +
+          '        <div class="sb-stat">' + esc(p.gpm) + '</div>\n' +
+          '        <div class="sb-stat">' + esc(p.xpm) + '</div>\n' +
+          '        <div class="sb-stat">' + esc(p.dmg) + '</div>\n' +
+          '      </div>';
+      }).join('') +
+      '\n    </div>';
+  }
+
+  var css = '<style>\n' +
+    '#dota-scoreboard{font-family:sans-serif;width:100%;max-width:900px}\n' +
+    '#dota-scoreboard *{box-sizing:border-box;margin:0;padding:0}\n' +
+    '#dota-scoreboard .sb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n' +
+    '#dota-scoreboard .sb-team-block{background:#1e1c20;border-radius:8px;overflow:hidden;border:1px solid #2a272e}\n' +
+    '#dota-scoreboard .sb-team-header{display:grid;grid-template-columns:1fr 80px 50px 50px 62px;align-items:center;padding:8px 14px;background:#2a272e;border-bottom:1px solid #35323a}\n' +
+    '#dota-scoreboard .sb-team-name{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#fff;text-decoration:none}\n' +
+    '#dota-scoreboard .sb-team-name:hover{color:#ab84ff}\n' +
+    '#dota-scoreboard .sb-team-logo{width:20px;height:20px;object-fit:contain}\n' +
+    '#dota-scoreboard .sb-col-label{text-align:center;font-size:11px;font-weight:600;color:#666672;text-transform:uppercase}\n' +
+    '#dota-scoreboard .sb-player-row{display:grid;grid-template-columns:1fr 80px 50px 50px 62px;align-items:center;padding:7px 14px;border-bottom:1px solid #2a272e;font-size:13px}\n' +
+    '#dota-scoreboard .sb-player-row:last-child{border-bottom:none}\n' +
+    '#dota-scoreboard .sb-player-row:nth-child(even){background:#222026}\n' +
+    '#dota-scoreboard .sb-player-cell{display:flex;align-items:center;gap:6px;min-width:0}\n' +
+    '#dota-scoreboard .sb-flag{width:16px;height:12px;object-fit:cover;flex-shrink:0;border-radius:2px}\n' +
+    '#dota-scoreboard .sb-player-name{color:#fff;font-weight:700;text-decoration:none;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n' +
+    '#dota-scoreboard .sb-player-name:hover{color:#ab84ff}\n' +
+    '#dota-scoreboard .sb-stat{text-align:center;color:#c5c5c6;font-size:13px;font-weight:500}\n' +
+    '@media(max-width:600px){#dota-scoreboard .sb-grid{grid-template-columns:1fr}#dota-scoreboard .sb-player-row,#dota-scoreboard .sb-team-header{grid-template-columns:1fr 68px 44px 44px 54px;padding:6px 10px;font-size:11px}}\n' +
+    '<' + '/style>';
+
+  var body = '<div id="dota-scoreboard"><div class="sb-grid">' + block(t1, p1) + block(t2, p2) + '\n  </div></div><br>';
+  return { css: css, body: body, full: css + '\n' + body };
+}
+
+$('dota-gen-scoreboard').addEventListener('click', function () {
+  var t1key = $('dota-team1-select').value, t2key = $('dota-team2-select').value;
+  if (!t1key || !t2key) { alert('Выбери обе команды'); return; }
+  var p1 = getStats('dota-team1-players', t1key), p2 = getStats('dota-team2-players', t2key);
+  var res = buildScoreboard(t1key, t2key, p1, p2);
+  var s = $('dota-sb-style');
+  if (!s) { s = document.createElement('style'); s.id = 'dota-sb-style'; document.head.appendChild(s); }
+  s.textContent = res.css.replace(/<\/?style>/g, '');
+  $('dota-scoreboard-preview').innerHTML = res.body;
+  $('dota-scoreboard-code').textContent = res.full;
+  $('dota-scoreboard-output').classList.add('visible');
+  $('dota-copy-scoreboard').style.display = 'inline-block';
+});
+$('dota-copy-scoreboard').addEventListener('click', function () {
+  navigator.clipboard.writeText($('dota-scoreboard-code').textContent);
+  var btn = $('dota-copy-scoreboard');
+  btn.textContent = 'Скопировано ✓';
+  setTimeout(function () { btn.textContent = 'Скопировать'; }, 2000);
+});
+
+// ---------------------------------------------------------------------
+// КАРТЫ: сторона победителя + счёт + победитель (галочка)
+// ---------------------------------------------------------------------
+var mapCount = 0;
+
+function refreshWinnerLabels() {
+  var t1 = DB_DOTA.teams[$('dota-map-team1').value], t2 = DB_DOTA.teams[$('dota-map-team2').value];
+  for (var i = 1; i <= mapCount; i++) {
+    var sel = $('dota-mwin-' + i);
+    if (!sel) continue;
+    sel.options[1].text = t1 ? t1.name : 'Команда 1';
+    sel.options[2].text = t2 ? t2.name : 'Команда 2';
+  }
+}
+
+function addMapRow() {
+  mapCount++;
+  var id = mapCount;
+  var div = document.createElement('div');
+  div.className = 'map-row';
+  div.innerHTML =
+    '<img class="map-preview" id="dota-mprev-' + id + '" alt="">' +
+    '<select id="dota-mside-' + id + '">' +
+      '<option value="">— сторона победителя —</option>' +
+      '<option value="light">Силы света</option>' +
+      '<option value="dark">Силы тьмы</option>' +
+    '</select>' +
+    '<input type="text" placeholder="32" id="dota-ms1-' + id + '">' +
+    '<span style="text-align:center;color:#555560;font-size:16px;line-height:34px">:</span>' +
+    '<input type="text" placeholder="28" id="dota-ms2-' + id + '">' +
+    '<select id="dota-mwin-' + id + '">' +
+      '<option value="">— победитель —</option>' +
+      '<option value="t1">Команда 1</option>' +
+      '<option value="t2">Команда 2</option>' +
+    '</select>';
+  $('dota-maps-rows').appendChild(div);
+  $('dota-mside-' + id).addEventListener('change', function (e) {
+    var prev = $('dota-mprev-' + id);
+    if (e.target.value && DOTA_SIDES[e.target.value]) { prev.src = DOTA_SIDES[e.target.value].img; prev.classList.add('visible'); }
+    else prev.classList.remove('visible');
+  });
+  refreshWinnerLabels();
+}
+$('dota-add-map').addEventListener('click', addMapRow);
+addMapRow(); addMapRow(); addMapRow();
+$('dota-map-team1').addEventListener('change', refreshWinnerLabels);
+$('dota-map-team2').addEventListener('change', refreshWinnerLabels);
+
+function buildMaps() {
+  var t1 = DB_DOTA.teams[$('dota-map-team1').value], t2 = DB_DOTA.teams[$('dota-map-team2').value];
+  if (!t1 || !t2) { alert('Выбери обе команды'); return null; }
+
+  var maps = [];
+  for (var i = 1; i <= mapCount; i++) {
+    var side = $('dota-mside-' + i).value, win = $('dota-mwin-' + i).value;
+    var s1 = $('dota-ms1-' + i).value.trim(), s2 = $('dota-ms2-' + i).value.trim();
+    if (!side && !win && !s1 && !s2) continue;            // пустая строка (напр. 3-й карты не было)
+    if (!side || !win) { alert('Карта ' + i + ': выбери сторону победителя и победившую команду'); return null; }
+    maps.push({ side: side, win: win, s1: s1, s2: s2 });
+  }
+  if (!maps.length) { alert('Заполни хотя бы одну карту'); return null; }
+
+  var showNames = maps.length <= 3;     // больше трёх карт — только логотипы
+  var minCol = maps.length <= 3 ? 240 : 150;
+
+  // Все стили — inline: блок не зависит ни от <style>, ни от CSS темы сайта
+  var S = {
+    wrap:  'font-family:sans-serif;width:100%;max-width:900px;box-sizing:border-box;line-height:1.3;text-align:left',
+    grid:  'display:grid;grid-template-columns:repeat(auto-fit,minmax(' + minCol + 'px,1fr));gap:10px;margin:0;padding:0',
+    card:  'background:#1e1c20;border:1px solid #2a272e;border-radius:8px;overflow:hidden;box-sizing:border-box;margin:0;padding:0',
+    row:   'display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:7px 10px;margin:0;box-sizing:border-box',
+    team:  'display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;margin:0;padding:0',
+    logo:  'width:18px;height:18px;max-width:none;object-fit:contain;flex-shrink:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none',
+    name:  'letter-spacing:normal;text-transform:none;font-size:11px;font-weight:700;line-height:1.2;color:#888890;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;padding:0',
+    check: 'display:inline-block;position:relative;flex-shrink:0;width:14px;height:14px;border-radius:50%;background:#44cc44;margin:0;padding:0',
+    tick:  'display:block;position:absolute;box-sizing:content-box;left:4.5px;top:2px;width:3px;height:6px;border:solid #141218;border-width:0 2px 2px 0;transform:rotate(45deg);margin:0;padding:0',
+    score: 'display:flex;align-items:center;justify-content:center;gap:4px;font-size:15px;font-weight:800;line-height:1.2;padding:0 6px;margin:0'
+  };
+  function tLogo(t) { return '<img src="' + esc(t.logo) + '" alt="' + esc(t.name) + '" style="' + S.logo + '">'; }
+  function tName(t) { return showNames ? '<span style="' + S.name + '">' + esc(t.shortName || t.name) + '</span>' : ''; }
+  var check = '<span style="' + S.check + '"><span style="' + S.tick + '"></span></span>';
+
+  var cards = maps.map(function (m) {
+    var side = DOTA_SIDES[m.side], w1 = m.win === 't1', w2 = m.win === 't2';
+    var T = 'letter-spacing:normal;text-transform:none;';
+    var win = T + 'color:#c5c5c6', lose = T + 'color:#555560';
+    var score = (m.s1 && m.s2)
+      ? '<span style="' + (w1 ? win : lose) + '">' + esc(m.s1) + '</span>' +
+        '<span style="' + T + 'color:#444450;font-size:13px;font-weight:600">:</span>' +
+        '<span style="' + (w2 ? win : lose) + '">' + esc(m.s2) + '</span>'
+      : '<span style="' + T + 'color:#444450;font-size:12px;font-weight:600">— : —</span>';
+    return '<div style="' + S.card + '">' +
+      '<div role="img" aria-label="' + side.name + '" style="width:100%;height:60px;margin:0;padding:0;background:#141218 url(\'' + side.img + '\') center 50%/cover no-repeat"></div>' +
+      '<div style="' + S.row + '">' +
+        '<div style="' + S.team + '">' + tLogo(t1) + tName(t1) + (w1 ? check : '') + '</div>' +
+        '<div style="' + S.score + '">' + score + '</div>' +
+        '<div style="' + S.team + ';flex-direction:row-reverse">' + (w2 ? check : '') + tName(t2) + tLogo(t2) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var body = '<div id="dota-maps" style="' + S.wrap + '"><div style="' + S.grid + '">' + cards + '</div></div><br>';
+  var usesData = maps.some(function (m) { return !DOTA_IMG[m.side].url; });
+  return { css: '', body: body, full: body, usesData: usesData };
+}
+
+$('dota-gen-maps').addEventListener('click', function () {
+  var res = buildMaps();
+  if (!res) return;
+  $('dota-maps-preview').innerHTML = res.body;
+  $('dota-maps-code').textContent = res.full;
+  $('dota-maps-warn').style.display = res.usesData ? 'block' : 'none';
+  $('dota-maps-output').classList.add('visible');
+  $('dota-copy-maps').style.display = 'inline-block';
+});
+$('dota-copy-maps').addEventListener('click', function () {
+  navigator.clipboard.writeText($('dota-maps-code').textContent);
+  var btn = $('dota-copy-maps');
+  btn.textContent = 'Скопировано ✓';
+  setTimeout(function () { btn.textContent = 'Скопировать'; }, 2000);
+});
+
+// ---------------------------------------------------------------------
+// ПОИСКОВЫЕ ВЫПАДАЮЩИЕ СПИСКИ КОМАНД
+// ---------------------------------------------------------------------
+[
+  { displayId: 'dota-team1-display',     selectId: 'dota-team1-select', ddId: 'dota-team1-dd' },
+  { displayId: 'dota-team2-display',     selectId: 'dota-team2-select', ddId: 'dota-team2-dd' },
+  { displayId: 'dota-map-team1-display', selectId: 'dota-map-team1',    ddId: 'dota-map-team1-dd' },
+  { displayId: 'dota-map-team2-display', selectId: 'dota-map-team2',    ddId: 'dota-map-team2-dd' }
+].forEach(function (cfg) {
+  var display = $(cfg.displayId), select = $(cfg.selectId), dd = $(cfg.ddId);
+  var optWrap = dd.querySelector('.sd-options');
+  var options = Array.prototype.filter.call(select.options, function (o) { return o.value !== ''; }).map(function (o) {
+    return { value: o.value, label: o.text, ru: DB_DOTA.teams[o.value].ru || '' };
+  });
+  var savedLabel = '';
+  function renderOptions(filter) {
+    var q = (filter || '').toLowerCase().trim();
+    var list = q ? options.filter(function (o) { return o.label.toLowerCase().indexOf(q) >= 0 || o.ru.indexOf(q) >= 0; }) : options;
+    if (!list.length) { optWrap.innerHTML = '<div class="sd-empty">Ничего не найдено</div>'; return; }
+    optWrap.innerHTML = list.map(function (o) {
+      return '<div class="sd-option' + (o.value === select.value ? ' selected' : '') + '" data-val="' + o.value + '">' + esc(o.label) + '</div>';
+    }).join('');
+    optWrap.querySelectorAll('.sd-option').forEach(function (el) {
+      el.addEventListener('click', function () {
+        select.value = el.dataset.val;
+        select.dispatchEvent(new Event('change'));
+        var found = options.filter(function (o) { return o.value === el.dataset.val; })[0];
+        savedLabel = found ? found.label : '';
+        display.value = savedLabel;
+        dd.classList.remove('open');
+      });
+    });
+  }
+  display.addEventListener('focus', function () { display.value = ''; renderOptions(''); dd.classList.add('open'); });
+  display.addEventListener('input', function () { renderOptions(display.value); dd.classList.add('open'); });
+  display.addEventListener('blur', function () {
+    setTimeout(function () { dd.classList.remove('open'); display.value = select.value ? savedLabel : ''; }, 200);
+  });
+});
+
+})();
+
 </script>
 </body>
 </html>
