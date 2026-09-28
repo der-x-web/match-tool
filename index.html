@@ -244,6 +244,8 @@ select:focus, input:focus { border-color: #ab84ff; }
               <option value="luminosity">Luminosity</option>
               <option value="jijiehao">JiJieHao</option>
               <option value="dendele">DENDELE</option>
+              <option value="onewin">1win Team</option>
+              <option value="shinden">ShindeN</option>
             </select>
             <div class="sd-dropdown" id="team1-dd"><div class="sd-options"></div></div>
           </div>
@@ -319,6 +321,8 @@ select:focus, input:focus { border-color: #ab84ff; }
               <option value="luminosity">Luminosity</option>
               <option value="jijiehao">JiJieHao</option>
               <option value="dendele">DENDELE</option>
+              <option value="onewin">1win Team</option>
+              <option value="shinden">ShindeN</option>
             </select>
             <div class="sd-dropdown" id="team2-dd"><div class="sd-options"></div></div>
           </div>
@@ -455,6 +459,8 @@ select:focus, input:focus { border-color: #ab84ff; }
               <option value="luminosity">Luminosity</option>
               <option value="jijiehao">JiJieHao</option>
               <option value="dendele">DENDELE</option>
+              <option value="onewin">1win Team</option>
+              <option value="shinden">ShindeN</option>
             </select>
             <div class="sd-dropdown" id="map-team1-dd"><div class="sd-options"></div></div>
           </div>
@@ -530,6 +536,8 @@ select:focus, input:focus { border-color: #ab84ff; }
               <option value="luminosity">Luminosity</option>
               <option value="jijiehao">JiJieHao</option>
               <option value="dendele">DENDELE</option>
+              <option value="onewin">1win Team</option>
+              <option value="shinden">ShindeN</option>
             </select>
             <div class="sd-dropdown" id="map-team2-dd"><div class="sd-options"></div></div>
           </div>
@@ -1053,7 +1061,7 @@ const DB = {
         { nick: 'zweih',       first: 'Иван',      last: 'Гогин',         flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/zweih-cs2/' },
         { nick: 'xiELO',       first: 'Владислав', last: 'Лысов',         flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/xielo-cs2/' },
         { nick: 'FL1T',        first: 'Евгений',   last: 'Лепёхин',       flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/fl1t-cs2/' },
-        { nick: 'slaxejezzz',  first: 'Вячеслав',  last: 'Винокуров',     flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/slax-cs2-2/' },
+        { nick: 'HObbit',      first: 'Абай',      last: 'Хасенов',       flag: 'kz', url: 'https://esports.ru/counter-strike-2/players/hobbit-cs2/' },
       ]
     },
     gamerlegion: {
@@ -1132,7 +1140,7 @@ const DB = {
         { nick: 'latto',   first: 'Бруно',    last: 'Ребелатто', flag: 'br', url: 'https://esports.ru/counter-strike-2/players/latto-cs2/' },
         { nick: 'dumau',   first: 'Эдуард',   last: 'Волкмер',   flag: 'br', url: 'https://esports.ru/counter-strike-2/players/dumau-cs2/' },
         { nick: 'try',     first: 'Аугусто',  last: 'Куэрво',    flag: 'ar', url: 'https://esports.ru/players/try-482d2f57-1655-4044-bda0-08f3af13b833-cs2/' },
-        { nick: 'arT',     first: 'Андрей',   last: 'Пёвезан',   flag: 'br', url: 'https://esports.ru/counter-strike-2/players/art-8a6b480a-3320-46b1-8ccc-d553068c1bac-cs2/' },
+        { nick: 'bobz',    first: 'Педро',    last: 'Роша',      flag: 'br', url: 'https://esports.ru/counter-strike-2/players/bobz-cs2/' },
         { nick: 'n1ssim',  first: 'Винисиус', last: 'Перейра',   flag: 'br', url: 'https://esports.ru/counter-strike-2/players/n1ssim-cs2/' },
       ]
     },
@@ -1514,6 +1522,26 @@ const DB = {
         { nick: 'Raijin', first: 'Константин', last: 'Трубаров',  flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/raijin-cs2/' },
         { nick: 'shg',    first: 'Артем',      last: 'Шагинян',   flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/sh4ggi-cs2/' },
         { nick: 'synyx',  first: 'Даниил',     last: 'Мазур',     flag: 'ua', url: 'https://esports.ru/counter-strike-2/players/synyx-cs2/' },
+      ]
+    },
+    onewin: {
+      name: '1win Team', shortName: '1win', ru: 'ван вин ванвин', logo: 'https://esports.ru/wp-content/uploads/2024/11/1win-1.png', url: 'https://esports.ru/teams/1win-cs2/',
+      players: [
+        { nick: 'nafany',      first: 'Владислав', last: 'Горшков',    flag: 'ru', url: 'https://esports.ru/counter-strike-2/players/nafany-cs2/' },
+        { nick: 'Ax1Le',       first: 'Сергей',    last: 'Рыхторов',   flag: 'ru', url: 'https://esports.ru/players/ax1le-cs2/' },
+        { nick: 'ArtFr0st',    first: 'Артем',     last: 'Харитонов',  flag: 'ru', url: 'https://esports.ru/players/artfr0st-cs2/' },
+        { nick: 'BELCHONOKK',  first: 'Андрей',    last: 'Ясинский',   flag: 'ru', url: 'https://esports.ru/players/belchonokk-cs2/' },
+        { nick: 'fame',        first: 'Петр',      last: 'Болышев',    flag: 'ru', url: 'https://esports.ru/players/fame-cs2/' },
+      ]
+    },
+    shinden: {
+      name: 'ShindeN', shortName: 'ShindeN', ru: 'шинден', logo: 'https://esports.ru/wp-content/uploads/2026/09/image_2026-09-28_115143117.png', url: 'https://esports.ru/counter-strike-2/teams/shinden-cs2/',
+      players: [
+        { nick: 'tom1jed', first: 'Томас',    last: 'Риверо',       flag: 'ar', url: 'https://esports.ru/counter-strike-2/players/tom1-cs2-2/' },
+        { nick: 'abizz',   first: 'Матиас',   last: 'Муньис Куси',  flag: 'ar', url: 'https://esports.ru/counter-strike-2/players/abizz-cs2/' },
+        { nick: 'ivz',     first: 'Иван',     last: 'Кинтана',      flag: 'ar', url: 'https://esports.ru/counter-strike-2/players/ivanzinho-cs2/' },
+        { nick: 'naz',     first: 'Насарено', last: 'Ромеро',       flag: 'ar', url: 'https://esports.ru/counter-strike-2/players/naz-e244cb04-b11b-4366-aeeb-2ebf4fa5cc5a-cs2/' },
+        { nick: 'guty',    first: '',         last: '',             flag: 'ar', url: '' },
       ]
     },
     wwteam: {
