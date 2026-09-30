@@ -3321,16 +3321,88 @@ var DOTA_SIDES = {
 // ---------------------------------------------------------------------
 var DB_DOTA = {
   teams: {
+    parivision: {
+      name: 'PARIVISION', shortName: 'PARI', ru: 'паривижн пари', alt: ['PARI'],
+      logo: 'https://api.esports.ru/static/300x300/team/135712-parivision-dota-2.png',
+      url: 'https://esports.ru/teams/parivision-dota2/',
+      players: [
+        { nick: 'Satanic', first: 'Алан', last: 'Галлямов', flag: 'ru', url: 'https://esports.ru/players/satanic-dota2/' },
+        { nick: 'No[o]ne', first: 'Владимир', last: 'Миненко', flag: 'ua', url: 'https://esports.ru/players/no-o-ne-dota2/' },
+        { nick: 'Noticed', first: 'Евгений', last: 'Игнатенко', flag: 'ru', url: 'https://esports.ru/players/noticed-dota2/' },
+        { nick: '9Class', first: 'Эдгар', last: 'Налтакян', flag: 'ru', url: 'https://esports.ru/players/9class-dota2/' },
+        { nick: 'Dukalis', first: 'Андрей', last: 'Куропаткин', flag: 'ru', url: 'https://esports.ru/players/dukalis-dota2/' },
+      ]
+    },
+    spirit: {
+      name: 'Team Spirit', shortName: 'Spirit', ru: 'спирит тим спирит', alt: ['Spirit'],
+      logo: 'https://esports.ru/wp-content/uploads/2025/11/image_2025-11-19_184603930.png',
+      url: 'https://esports.ru/teams/spirit-dota2/',
+      players: [
+        { nick: 'Yatoro', first: 'Илья', last: 'Мулярчук', flag: 'ua', url: 'https://esports.ru/players/yatoro-dota2/' },
+        { nick: 'Larl', first: 'Денис', last: 'Сигитов', flag: 'ru', url: 'https://esports.ru/players/larl-dota2/' },
+        { nick: 'Batyuk', first: 'Богдан', last: 'Батюк', flag: 'ua', url: 'https://esports.ru/dota-2/players/bboddy-dota2/' },
+        { nick: 'not me', first: 'Алексей', last: 'Космынин', flag: 'ru', url: 'https://esports.ru/players/notme-dota2/' },
+        { nick: 'rue', first: 'Александр', last: 'Филин', flag: 'ru', url: 'https://esports.ru/players/rue-dota2/' },
+      ]
+    },
+    liquid: {
+      name: 'Team Liquid', shortName: 'Liquid', ru: 'ликвид тим ликвид', alt: ['Liquid'],
+      logo: 'https://api.esports.ru/static/300x300/team/1647-team-liquid.png',
+      url: 'https://esports.ru/teams/liquid-dota2/',
+      players: [
+        { nick: 'miCKe', first: 'Майк', last: 'Ву', flag: 'se', url: 'https://esports.ru/players/micke-dota2/' },
+        { nick: 'MidOne', first: 'Чжэн', last: 'Йек Най', flag: 'my', url: 'https://esports.ru/dota-2/players/midone-dota2/' },
+        { nick: 'Wisper', first: 'Адриан', last: 'Сеспедес Доблес', flag: 'bo', url: 'https://esports.ru/players/wisper-vs-usa-dota2/' },
+        { nick: 'Boxi', first: 'Самуэль', last: 'Сван', flag: 'se', url: 'https://esports.ru/players/bomboclan-dota2/' },
+        { nick: 'tOfu', first: 'Эрик', last: 'Энгель', flag: 'de', url: 'https://esports.ru/players/tofu-dota2/' },
+      ]
+    },
+    betboom: {
+      name: 'BetBoom Team', shortName: 'BetBoom', ru: 'бетбум бет бум', alt: ['BetBoom'],
+      logo: 'https://api.esports.ru/static/300x300/team/130768-betboom-team.png',
+      url: 'https://esports.ru/teams/betboom-dota2/',
+      players: [
+        { nick: 'Kiritych~', first: 'Илья', last: 'Ульянов', flag: 'ru', url: 'https://esports.ru/players/kiritych-dota2/' },
+        { nick: 'Save-', first: 'Виталий', last: 'Мельник', flag: 'md', url: 'https://esports.ru/players/save-vitalie-melnic-dota2/' },
+        { nick: 'MieRo', first: 'Матвей', last: 'Васюнин', flag: 'ru', url: 'https://esports.ru/players/i-m-so-bad-i-know-dota2/' },
+        { nick: 'swedenstrong', first: 'Георгий', last: 'Зайналабидов', flag: 'ru', url: 'https://esports.ru/dota-2/players/swedenstrong-dota2/' },
+        { nick: 'Kataomi', first: 'Владислав', last: 'Семенов', flag: 'ru', url: 'https://esports.ru/players/tetsuya-kuroko-dota2/' },
+      ]
+    },
+    og: {
+      name: 'OG', shortName: 'OG', ru: 'ог оджи о джи',
+      logo: 'https://esports.ru/wp-content/uploads/2026/02/imgi_160_73px-og_2026_allmode.png',
+      url: 'https://esports.ru/teams/og-dota2/',
+      players: [
+        { nick: 'Natsumi-', first: 'Джон', last: 'Варгас', flag: 'ph', url: 'https://esports.ru/players/natsumi-dota2/' },
+        { nick: 'Topson', first: 'Топиас', last: 'Таавитсайнен', flag: 'fi', url: 'https://esports.ru/dota-2/players/topson-dota2/' },
+        { nick: 'SSS', first: 'Валерий', last: 'Лазарев', flag: 'ru', url: 'https://esports.ru/players/tv-wastedgod-dota2/' },
+        { nick: 'OneJey', first: 'Иван', last: 'Живицкий', flag: 'by', url: 'https://esports.ru/players/i-have-no-limitations-dota2/' },
+        { nick: 'skem', first: 'Ролен', last: 'Андре Габриэль Онг', flag: 'ph', url: 'https://esports.ru/players/i-want-to-meet-my-expectations-dota2/' },
+      ]
+    },
+    levelup: {
+      name: 'Level UP', shortName: 'LVLUP', ru: 'левел ап лвл ап', alt: ['Level Up', 'LVL UP'],
+      logo: 'https://api.esports.ru/static/300x300/team/1948-level-up.png',
+      url: 'https://esports.ru/teams/lvlup-dota2/',
+      players: [
+        { nick: 'WoE', first: 'Николай', last: 'Рубан', flag: 'ru', url: 'https://esports.ru/players/woe-dota2/' },
+        { nick: 'Ainkrad', first: 'Алексей', last: 'Дивеевский', flag: 'by', url: 'https://esports.ru/players/ainkrad-dota2/' },
+        { nick: 'bb3px', first: 'Николай', last: 'Евдокимычев', flag: 'ru', url: 'https://esports.ru/players/bb3px-6b625eff-bba8-4470-a090-1c15adab0182-dota2/' },
+        { nick: 'quezzy', first: 'Александр', last: 'Липин', flag: 'ru', url: 'https://esports.ru/players/survivor-guilt-syndrome-dota2/' },
+        { nick: 'Htrd', first: 'Андрей', last: 'Федоров', flag: 'ru', url: 'https://esports.ru/players/htrd-dota2/' },
+      ]
+    },
     onewin: {
       name: '1w Team', shortName: '1W', ru: '1win ван вин ванвин', alt: ['1win Team', '1win'],
       logo: 'https://api.esports.ru/static/300x300/team/134536-1win-dota-2.png',
       url: 'https://esports.ru/teams/1win-dota2/',
       players: [
-        { nick: 'Shad',     first: 'Инджи',    last: 'Люб',      flag: 'nl', url: 'https://esports.ru/players/shad-dota2/' },
-        { nick: 'bzm',      first: 'Божидар',  last: 'Богданов', flag: 'bg', url: 'https://esports.ru/players/hansha-dota2/' },
-        { nick: '33',       first: 'Нета',     last: 'Шапира',   flag: 'il', url: 'https://esports.ru/players/33dsfgsfg-dota2/' },
-        { nick: 'Ari',      first: 'Мэтью',    last: 'Уокер',    flag: 'gb', url: 'https://esports.ru/players/moon-shard-enjoyer-dota2/' },
-        { nick: 'Whitemon', first: 'Мэтью',    last: 'Филмон',   flag: 'id', url: 'https://esports.ru/players/the-next-level-play-dota2/' },
+        { nick: 'Pure', first: 'Иван', last: 'Москаленко', flag: 'ru', url: 'https://esports.ru/players/pure-ivan-moskalenko-dota2/' },
+        { nick: 'bzm', first: 'Божидар', last: 'Богданов', flag: 'bg', url: 'https://esports.ru/players/hansha-dota2/' },
+        { nick: '33', first: 'Нета', last: 'Шапира', flag: 'il', url: 'https://esports.ru/players/33dsfgsfg-dota2/' },
+        { nick: 'Ari', first: 'Мэтью', last: 'Уокер', flag: 'gb', url: 'https://esports.ru/players/moon-shard-enjoyer-dota2/' },
+        { nick: 'Whitemon', first: 'Мэтью', last: 'Филмон', flag: 'id', url: 'https://esports.ru/players/the-next-level-play-dota2/' },
       ]
     },
     aurora: {
@@ -3338,11 +3410,11 @@ var DB_DOTA = {
       logo: 'https://api.esports.ru/static/300x300/team/133882-aurora-dota-2.png',
       url: 'https://esports.ru/teams/aurora-dota2/',
       players: [
-        { nick: 'skiter',  first: 'Оливер',   last: 'Лепко',   flag: 'sk', url: 'https://esports.ru/players/c64-oliver-dota2/' },
-        { nick: 'Stojkov', first: 'Игорь',    last: 'Стойков', flag: 'mk', url: '' },
-        { nick: 'Ws',      first: 'Чунг',     last: 'Вей Шен', flag: 'my', url: 'https://esports.ru/players/shen-dota2/' },
-        { nick: 'Mira',    first: 'Мирослав', last: 'Колпаков', flag: 'ua', url: 'https://esports.ru/players/miroslaw-dota2/' },
-        { nick: 'kaori',   first: 'Олег',     last: 'Медведок', flag: 'ua', url: 'https://esports.ru/players/kaori-6cb960d3-cb9e-4f80-a2f0-dd4459b27243-dota2/' },
+        { nick: 'skiter', first: 'Оливер', last: 'Лепко', flag: 'sk', url: 'https://esports.ru/players/c64-oliver-dota2/' },
+        { nick: 'Mikoto', first: 'Фатур', last: 'Рахман', flag: 'id', url: 'https://esports.ru/players/mikoto-dota2/' },
+        { nick: 'Ws', first: 'Чунг', last: 'Вей Шен', flag: 'my', url: 'https://esports.ru/players/shen-dota2/' },
+        { nick: 'Mira', first: 'Мирослав', last: 'Колпаков', flag: 'ua', url: 'https://esports.ru/players/miroslaw-dota2/' },
+        { nick: 'kaori', first: 'Олег', last: 'Медведок', flag: 'ua', url: 'https://esports.ru/players/kaori-6cb960d3-cb9e-4f80-a2f0-dd4459b27243-dota2/' },
       ]
     },
     conventus: {
@@ -3362,11 +3434,11 @@ var DB_DOTA = {
       logo: 'https://esports.ru/wp-content/uploads/2026/04/image-5.png',
       url: 'https://esports.ru/teams/gamerlegion-dota-2-dota2/',
       players: [
-        { nick: 'Timado', first: 'Энцо',     last: "Джаноли О'Коннор", flag: 'pe', url: 'https://esports.ru/dota-2/players/timado-dota2/' },
-        { nick: 'RCY',    first: 'Френсис',  last: 'Фандемера',        flag: 'us', url: 'https://esports.ru/players/rcy-dota2/' },
-        { nick: 'Fayde',  first: 'Виктор',   last: 'Зуев',             flag: 'us', url: 'https://esports.ru/players/perupirat-dota2/' },
-        { nick: 'Bignum', first: 'Даниил',   last: 'Шеховцов',         flag: 'ua', url: 'https://esports.ru/players/bignum-dota2/' },
-        { nick: 'Speeed', first: 'Пол',      last: 'Боккиккио',        flag: 'us', url: 'https://esports.ru/players/paul-dota2/' },
+        { nick: 'Yuma', first: 'Юма', last: 'Лангле', flag: 'ni', url: 'https://esports.ru/dota-2/players/yuma-dota2/' },
+        { nick: 'RCY', first: 'Френсис', last: 'Фандемера', flag: 'us', url: 'https://esports.ru/players/rcy-dota2/' },
+        { nick: 'Fayde', first: 'Виктор', last: 'Зуев', flag: 'us', url: 'https://esports.ru/players/perupirat-dota2/' },
+        { nick: 'Bignum', first: 'Даниил', last: 'Шеховцов', flag: 'ua', url: 'https://esports.ru/players/bignum-dota2/' },
+        { nick: 'Speeed', first: 'Пол', last: 'Боккиккио', flag: 'us', url: 'https://esports.ru/players/paul-dota2/' },
       ]
     },
     hokori: {
@@ -3470,11 +3542,11 @@ var DB_DOTA = {
       logo: 'https://api.esports.ru/static/300x300/team/136650-team-nemesis.png',
       url: 'https://esports.ru/dota-2/teams/team-nemesis-dota2/',
       players: [
-        { nick: 'JaCkky',      first: 'Сулия',   last: 'Кхоомфетсавонг', flag: 'la', url: 'https://esports.ru/dota-2/players/jackky-dota2/' },
-        { nick: 'Mo13ei',      first: 'Фабиан',  last: 'Кнер',           flag: 'de', url: 'https://esports.ru/players/mo13ei-dota2/' },
-        { nick: 'SabeRLight-', first: 'Йонас',   last: 'Волек',          flag: 'cz', url: 'https://esports.ru/players/saberlight-dota2/' },
-        { nick: 'Jhocam',      first: 'Три',     last: 'Кункоро',        flag: 'id', url: 'https://esports.ru/dota-2/players/pathetic-dota2/' },
-        { nick: 'NARMAN',      first: 'Равдан',  last: 'Нармандах',      flag: 'mn', url: 'https://esports.ru/dota-2/players/hustla-dota2/' },
+        { nick: 'JaCkky', first: 'Сулия', last: 'Кхоомфетсавонг', flag: 'la', url: 'https://esports.ru/dota-2/players/jackky-dota2/' },
+        { nick: 'Ken', first: 'Аргл', last: 'Льесис', flag: 'ph', url: 'https://esports.ru/dota-2/players/ken-argle-llesis-dota2/' },
+        { nick: 'Jabz', first: 'Ануча', last: 'Дживаронг', flag: 'th', url: 'https://esports.ru/players/jabz-dota2/' },
+        { nick: 'Jhocam', first: 'Три', last: 'Кункоро', flag: 'id', url: 'https://esports.ru/dota-2/players/pathetic-dota2/' },
+        { nick: 'NARMAN', first: 'Равдан', last: 'Нармандах', flag: 'mn', url: 'https://esports.ru/dota-2/players/hustla-dota2/' },
       ]
     },
     yandex: {
@@ -3494,11 +3566,11 @@ var DB_DOTA = {
       logo: 'https://api.esports.ru/static/300x300/team/128329-xtreme-gaming.png',
       url: 'https://esports.ru/teams/xtreme-dota2/',
       players: [
-        { nick: 'Ame',    first: 'Ван',          last: 'Чуньюй',   flag: 'cn', url: 'https://esports.ru/players/ame-dota2/' },
-        { nick: 'Xm',     first: 'Го',           last: 'Хунчэн',   flag: 'cn', url: 'https://esports.ru/players/xm-dota2/' },
-        { nick: 'zeal',   first: 'Николас Лим',  last: 'Энг Хан',  flag: 'cn', url: 'https://esports.ru/dota-2/players/zeal-a6d2b1f1-b384-46d3-9da1-20f92b1c7401-dota2/' },
-        { nick: 'XinQ',   first: 'Чжао',         last: 'Цзысин',   flag: 'cn', url: 'https://esports.ru/dota-2/players/xinq-dota2/' },
-        { nick: 'BoBoKa', first: 'Е',            last: 'Чжибяо',   flag: 'cn', url: 'https://esports.ru/players/boboka-dota2/' },
+        { nick: 'Ame', first: 'Ван', last: 'Чуньюй', flag: 'cn', url: 'https://esports.ru/players/ame-dota2/' },
+        { nick: 'Moon', first: 'Кам Бун', last: 'Сен', flag: 'my', url: '' },
+        { nick: 'zeal', first: 'Николас Лим', last: 'Энг Хан', flag: 'my', url: 'https://esports.ru/dota-2/players/zeal-a6d2b1f1-b384-46d3-9da1-20f92b1c7401-dota2/' },
+        { nick: 'XinQ', first: 'Чжао', last: 'Цзысин', flag: 'cn', url: 'https://esports.ru/dota-2/players/xinq-dota2/' },
+        { nick: 'BoBoKa', first: 'Е', last: 'Чжибяо', flag: 'cn', url: 'https://esports.ru/players/boboka-dota2/' },
       ]
     },
     yakult: {
