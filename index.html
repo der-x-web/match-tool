@@ -386,6 +386,21 @@ select:focus, input:focus { border-color: #ab84ff; }
   <!-- MAPS -->
   <div class="tab-panel" id="tab-maps">
     <div class="card">
+      <div class="card-title">Способ ввода</div>
+      <div class="mode-switcher" style="margin-bottom:0">
+        <button class="mode-btn active" id="maps-mode-manual-btn">✋ Вручную</button>
+        <button class="mode-btn" id="maps-mode-text-btn">📋 Текст с HLTV</button>
+      </div>
+      <div id="maps-mode-text" style="display:none;margin-top:12px">
+        <div class="notice">Скопируй блок карт со страницы матча на HLTV и вставь сюда — команды, карты и счёт подставятся ниже, блок соберётся сам. Можно вставить сразу несколько матчей.</div>
+        <textarea class="paste-area" id="maps-hltv-paste" placeholder="2 карты было сыграно:&#10;Dust2&#10;Spirit&#10;13&#10;[STATS](https://www.hltv.org/stats/...)&#10;(9:3; 4:3)&#10;M80&#10;6&#10;Mirage&#10;Spirit&#10;M80"></textarea>
+        <div class="paste-status" id="maps-paste-status"></div>
+        <div class="mode-switcher" id="maps-match-pick" style="display:none;margin-top:8px;flex-wrap:wrap"></div>
+        <button class="btn btn-primary btn-parse" id="btn-parse-maps">Собрать из текста</button>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Команды</div>
       <div class="row-2">
         <div><label>Команда 1 (слева)</label>
@@ -3282,15 +3297,220 @@ document.getElementById('copy-maps').addEventListener('click', () => {
     display.addEventListener('blur', () => {
       setTimeout(() => {
         dd.classList.remove('open');
-        if (!display.value && select.value) {
-          display.value = savedLabel;
-        } else if (!select.value) {
-          display.value = '';
-        } else {
-          display.value = savedLabel;
-        }
+        // подпись берём из самого select — он мог быть выставлен парсером текста HLTV
+        const opt = select.options[select.selectedIndex];
+        display.value = (select.value && opt) ? opt.text : '';
       }, 200);
     });
+  });
+})();
+
+// =========================================================
+// CS2 MAPS: ввод текстом с HLTV (альтернатива ручному выбору)
+// Формат на карту:  Карта / Команда A / [счёт] / [STATS](…) / (половины) / Команда B / [счёт]
+// Несыгранная карта — без счёта. Заголовок «N карты было сыграно:» начинает новый матч.
+// =========================================================
+(function () {
+  const $ = id => document.getElementById(id);
+
+  // --- переключатель режимов ---
+  function setMode(text) {
+    $('maps-mode-text').style.display = text ? '' : 'none';
+    $('maps-mode-text-btn').classList.toggle('active', text);
+    $('maps-mode-manual-btn').classList.toggle('active', !text);
+  }
+  $('maps-mode-manual-btn').addEventListener('click', () => setMode(false));
+  $('maps-mode-text-btn').addEventListener('click', () => setMode(true));
+
+  // --- нормализация ---
+  const norm = s => String(s || '').toLowerCase().replace(/^de_/, '').replace(/[^a-z0-9а-яё]/g, '');
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const unlink = s => { const m = s.match(/^\[(.+?)\]\(.*\)$/); return (m ? m[1] : s).trim(); };
+
+  // --- карты: всё, что есть в DB.maps, + известные карты пула, которых в базе нет ---
+  const MAP_ALIAS = {};
+  Object.keys(DB.maps).forEach(k => { MAP_ALIAS[norm(k)] = k; MAP_ALIAS[norm(DB.maps[k].name)] = k; });
+  MAP_ALIAS['dust'] = MAP_ALIAS['dustii'] = MAP_ALIAS['dust2'] = 'dust2';
+  ['overpass', 'train', 'vertigo', 'cobblestone', 'cbble', 'tuscany', 'season'].forEach(n => {
+    if (!MAP_ALIAS[n]) MAP_ALIAS[n] = '?' + n;   // '?' — карта существует, но её нет в DB.maps
+  });
+  const mapKeyOf = line => MAP_ALIAS[norm(line)] || null;
+
+  // --- команды: key, name, shortName, name без «Team»/«Esports»/«Gaming»… + ручные алиасы ---
+  const TEAM_ALIAS = { natusvincere: 'navi', virtuspro: 'vp', ninjasinpyjamas: 'nip', '100thieves': 'thieves100', '9z': 'ninez', '9zteam': 'ninez', '1win': 'onewin', betm: 'betm33', '33': 'betm33' };
+  const teamIndex = {};
+  Object.entries(DB.teams).forEach(([key, t]) => {
+    const stripped = t.name.replace(/^(team|the)\s+/i, '').replace(/\s+(team|esports|gaming|clan)$/i, '');
+    [key, t.name, t.shortName, stripped].forEach(v => { const n = norm(v); if (n && !teamIndex[n]) teamIndex[n] = key; });
+  });
+  Object.entries(TEAM_ALIAS).forEach(([n, key]) => { if (DB.teams[key]) teamIndex[n] = key; });
+
+  function teamKeyOf(name) {
+    const n = norm(name);
+    if (!n) return null;
+    if (teamIndex[n]) return teamIndex[n];
+    if (n.length < 4) return null;                     // короткие названия — только точное совпадение
+    let best = null, bestD = Infinity;
+    for (const v in teamIndex) {
+      if (v.length < 4) continue;
+      const d = levenshtein(n, v);
+      if (d < bestD) { bestD = d; best = teamIndex[v]; }
+    }
+    return bestD <= 1 ? best : null;
+  }
+
+  // --- разбор текста в матчи ---
+  const RE_HEADER = /^\d+\s+карт\S*\s+(был\S*\s+)?сыгран|maps?\s+played/i;
+  const RE_SKIP   = /^(stats|pick|picked|removed|decider|left\s*over|best of|bo\d)\b/i;
+  const RE_HALVES = /^\(.*\)$/;
+  const RE_SCORE  = /^\d{1,2}$/;
+
+  function parseMatches(text) {
+    // HLTV при копировании дублирует текст: «MirageMirage» в одной строке и «Legacy / Legacy» двумя строками подряд
+    const undouble = l => {
+      const h = l.length / 2;
+      return (l.length >= 4 && l.length % 2 === 0 && l.slice(0, h) === l.slice(h)) ? l.slice(0, h) : l;
+    };
+    const lines = text.split(/\r?\n/)
+      .map(l => undouble(unlink(l.replace(/[\u200B-\u200D\uFEFF]/g, '').trim())))
+      .filter(Boolean)
+      .filter((l, i, arr) => i === 0 || RE_SCORE.test(l) || l !== arr[i - 1]);
+    const matches = [];
+    let cur = null, entry = null;
+
+    const closeEntry = () => {
+      if (entry && cur) cur.maps.push(entry);
+      entry = null;
+    };
+    const newMatch = () => { closeEntry(); cur = { maps: [] }; matches.push(cur); };
+
+    for (const line of lines) {
+      if (RE_HEADER.test(line)) { newMatch(); continue; }
+      if (RE_SKIP.test(line) || RE_HALVES.test(line)) continue;
+      if (/^[-–—:\s]+$/.test(line)) continue;              // «-» / «— : —» вместо счёта несыгранной карты
+
+      const mk = mapKeyOf(line);
+      if (mk) {
+        closeEntry();
+        if (!cur) newMatch();
+        entry = { mapKey: mk, mapRaw: line, teams: [] };   // teams: [{ name, score }]
+        continue;
+      }
+      if (!entry) continue;                                 // мусор до первой карты — пропускаем
+
+      const last = entry.teams[entry.teams.length - 1];
+      if (RE_SCORE.test(line) && last && last.score === '') { last.score = line; continue; }
+      if (entry.teams.length < 2 && !entry.teams.some(t => norm(t.name) === norm(line))) entry.teams.push({ name: line, score: '' });
+    }
+    closeEntry();
+
+    // Без заголовка в тексте несколько матчей: делим, когда меняется пара команд
+    const out = [];
+    matches.forEach(m => {
+      let group = null, pair = null;
+      m.maps.forEach(mp => {
+        const p = mp.teams.map(t => norm(t.name)).sort().join('|');
+        if (!group || (mp.teams.length === 2 && pair && p !== pair)) { group = { maps: [] }; out.push(group); pair = null; }
+        if (mp.teams.length === 2 && !pair) pair = p;
+        group.maps.push(mp);
+      });
+    });
+    return out.filter(m => m.maps.length);
+  }
+
+  // --- приводим матч к виду «команда 1 слева / команда 2 справа» ---
+  function normalizeMatch(m) {
+    const first = m.maps.find(mp => mp.teams.length === 2) || m.maps[0];
+    const n1 = first.teams[0] ? first.teams[0].name : '';
+    const n2 = first.teams[1] ? first.teams[1].name : '';
+    const maps = m.maps.map(mp => {
+      let s1 = '', s2 = '';
+      mp.teams.forEach((t, idx) => {
+        const side = norm(t.name) === norm(n1) ? 1 : norm(t.name) === norm(n2) ? 2 : idx + 1;
+        if (side === 1) s1 = t.score; else s2 = t.score;
+      });
+      return { mapKey: mp.mapKey, mapRaw: mp.mapRaw, s1, s2, played: s1 !== '' && s2 !== '' };
+    });
+
+    // Несыгранные карты (десайдер при 2:0, ещё не начавшиеся) остаются в блоке как «— : —»
+    let w1 = 0, w2 = 0;
+    maps.forEach(x => { if (x.played) { if (+x.s1 > +x.s2) w1++; else if (+x.s2 > +x.s1) w2++; } });
+    return { n1, n2, w1, w2, maps, unplayed: maps.filter(x => !x.played) };
+  }
+
+  // --- подстановка в ручную форму и генерация блока ---
+  function setTeam(selectId, displayId, key) {
+    const sel = $(selectId);
+    sel.value = key;
+    sel.dispatchEvent(new Event('change'));
+    const opt = sel.options[sel.selectedIndex];
+    $(displayId).value = (key && opt) ? opt.text : '';
+  }
+
+  function loadMatch(match) {
+    const warn = [];
+    const k1 = teamKeyOf(match.n1), k2 = teamKeyOf(match.n2);
+    setTeam('map-team1', 'map-team1-display', k1 || '');
+    if (!k1) warn.push(`команда «${match.n1}» не найдена в базе — выбери вручную`);
+    setTeam('map-team2', 'map-team2-display', k2 || '');
+    if (!k2) warn.push(`команда «${match.n2}» не найдена в базе — выбери вручную`);
+
+    // пересобираем строки карт (buildMaps пропускает удалённые id)
+    $('maps-rows').innerHTML = '';
+    match.maps.forEach(x => {
+      addMapRow();
+      const id = mapCount;
+      const sel = $(`msel-${id}`);
+      if (x.mapKey[0] === '?') warn.push(`карты «${x.mapRaw}» нет в базе (DB.maps) — добавь её, иначе она не попадёт в блок`);
+      else { sel.value = x.mapKey; sel.dispatchEvent(new Event('change')); }
+      $(`ms1-${id}`).value = x.s1;
+      $(`ms2-${id}`).value = x.s2;
+    });
+
+    if (k1 && k2) $('gen-maps').click();
+    else {                                   // не показываем блок от прошлого матча
+      $('maps-output').classList.remove('visible');
+      $('copy-maps').style.display = 'none';
+    }
+
+    const t1 = k1 ? DB.teams[k1].shortName : match.n1, t2 = k2 ? DB.teams[k2].shortName : match.n2;
+    let msg = `✓ ${t1} ${match.w1}:${match.w2} ${t2} · карт в блоке: ${match.maps.length}`;
+    if (match.unplayed.length) msg += `\n${match.unplayed.map(x => x.mapRaw).join(', ')} — без счёта, в блоке как «— : —»`;
+    if (warn.length) msg += '\n⚠️ ' + warn.join('\n⚠️ ');
+    if (!(k1 && k2)) msg += '\nПосле выбора команд нажми «Сгенерировать HTML»';
+    const st = $('maps-paste-status');
+    st.textContent = msg;
+    st.className = 'paste-status ' + (warn.length ? 'warn' : 'done');
+  }
+
+  let parsedMatches = [];
+  function renderPicker(active) {
+    const box = $('maps-match-pick');
+    if (parsedMatches.length < 2) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.style.display = 'flex';
+    box.innerHTML = parsedMatches.map((m, i) =>
+      `<button class="mode-btn${i === active ? ' active' : ''}" data-match="${i}">${esc(m.n1)} ${m.w1}:${m.w2} ${esc(m.n2)}</button>`
+    ).join('');
+    box.querySelectorAll('[data-match]').forEach(b => b.addEventListener('click', () => {
+      const i = +b.dataset.match;
+      renderPicker(i);
+      loadMatch(parsedMatches[i]);
+    }));
+  }
+
+  $('btn-parse-maps').addEventListener('click', () => {
+    const st = $('maps-paste-status');
+    const raw = $('maps-hltv-paste').value;
+    parsedMatches = parseMatches(raw).map(normalizeMatch).filter(m => m.maps.length);
+    if (!parsedMatches.length) {
+      renderPicker(-1);
+      st.textContent = 'Не нашёл ни одной карты — проверь, что скопирован блок карт со страницы матча';
+      st.className = 'paste-status error';
+      return;
+    }
+    renderPicker(0);
+    loadMatch(parsedMatches[0]);
+    if (parsedMatches.length > 1) st.textContent = `Найдено матчей: ${parsedMatches.length} — переключай кнопками выше\n` + st.textContent;
   });
 })();
 </script>
